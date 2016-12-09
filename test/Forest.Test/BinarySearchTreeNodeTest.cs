@@ -2,100 +2,94 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Forest.Test
 {
     public class BinarySearchTreeNodeTest
     {
-        protected static BinarySearchTree<int, int> tree;
+        protected BinarySearchTree<int, int> tree;
 
-        [TestClass]
-        public class TheGetMaximumMethod : BinarySearchTreeTest
+        public class TheGetMaximumMethod : BinarySearchTreeNodeTest
         {
-            [TestInitialize]
-            public void TestInitialize()
+            public TheGetMaximumMethod()
             {
                 tree = new BinarySearchTree<int, int>() { { 5, 5 }, { 10, 10 } };
             }
 
-            [TestMethod, ExpectedException(typeof(InvalidOperationException))]
+            [Fact]
             public void ShouldThrowInvalidOperationException()
             {
                 var node = new BinarySearchTreeNode<int, int>(1, 1);
 
-                node.GetMaximum();
+                Assert.Throws<InvalidOperationException>(() => node.GetMaximum());
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnNodeWithKeyTen()
             {
-                Assert.AreEqual(10, tree.Root.GetMaximum().Key);
+                Assert.Equal(10, tree.Root.GetMaximum().Key);
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnSelf()
             {
                 var node = new BinarySearchTreeNode<int, int>(1, 1);
 
                 tree.Add(node);
 
-                Assert.AreEqual(1, node.GetMaximum().Key);
+                Assert.Equal(1, node.GetMaximum().Key);
             }
         }
 
-        [TestClass]
-        public class TheGetMinimumMethod : BinarySearchTreeTest
+        public class TheGetMinimumMethod : BinarySearchTreeNodeTest
         {
-            [TestInitialize]
-            public void TestInitialize()
+            public TheGetMinimumMethod()
             {
                 tree = new BinarySearchTree<int, int>() { { 5, 5 }, { 1, 1 } };
             }
 
-            [TestMethod, ExpectedException(typeof(InvalidOperationException))]
+            [Fact]
             public void ShouldThrowInvalidOperationException()
             {
                 var node = new BinarySearchTreeNode<int, int>(1, 1);
 
-                node.GetMinimum();
+                Assert.Throws<InvalidOperationException>(() => node.GetMinimum());
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnNodeWithKeyOne()
             {
-                Assert.AreEqual(1, tree.Root.GetMinimum().Key);
+                Assert.Equal(1, tree.Root.GetMinimum().Key);
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnSelf()
             {
                 var node = new BinarySearchTreeNode<int, int>(10, 10);
 
                 tree.Add(node);
 
-                Assert.AreEqual(10, node.GetMinimum().Key);
+                Assert.Equal(10, node.GetMinimum().Key);
             }
         }
 
-        [TestClass]
-        public class TheGetPredecessorMethod : BinarySearchTreeTest
+        public class TheGetPredecessorMethod : BinarySearchTreeNodeTest
         {
-            [TestInitialize]
-            public void TestInitialize()
+            public TheGetPredecessorMethod()
             {
                 tree = new BinarySearchTree<int, int>() { { 5, 5 }, { 2, 2 }, { 7, 7 }, { 1, 1 }, { 9, 9 }, { 6, 6 }, { 10, 10 } };
             }
 
-            [TestMethod, ExpectedException(typeof(InvalidOperationException))]
+            [Fact]
             public void ShouldThrowInvalidOperationException()
             {
                 var node = new BinarySearchTreeNode<int, int>(1, 1);
 
-                node.GetPredecessor();
+                Assert.Throws<InvalidOperationException>(() => node.GetPredecessor());
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnNodesReversedInOrder()
             {
                 var expectedKeys = new List<int?>() { 10, 9, 7, 6, 5, 2, 1, null };
@@ -116,28 +110,26 @@ namespace Forest.Test
                     node = node.GetPredecessor();
                 }
 
-                CollectionAssert.AreEqual(expectedKeys, actualKeys);
+                Assert.Equal(expectedKeys, actualKeys);
             }
         }
 
-        [TestClass]
-        public class TheGetSuccessorMethod : BinarySearchTreeTest
+        public class TheGetSuccessorMethod : BinarySearchTreeNodeTest
         {
-            [TestInitialize]
-            public void TestInitialize()
+            public TheGetSuccessorMethod()
             {
                 tree = new BinarySearchTree<int, int>() { { 5, 5 }, { 2, 2 }, { 7, 7 }, { 1, 1 }, { 9, 9 }, { 6, 6 }, { 10, 10 } };
             }
 
-            [TestMethod, ExpectedException(typeof(InvalidOperationException))]
+            [Fact]
             public void ShouldThrowInvalidOperationException()
             {
                 var node = new BinarySearchTreeNode<int, int>(1, 1);
 
-                node.GetSuccessor();
+                Assert.Throws<InvalidOperationException>(() => node.GetSuccessor());
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnNodesReversedInOrder()
             {
                 var expectedKeys = new List<int?>() { 1, 2, 5, 6, 7, 9, 10, null };
@@ -158,7 +150,7 @@ namespace Forest.Test
                     node = node.GetSuccessor();
                 }
 
-                CollectionAssert.AreEqual(expectedKeys, actualKeys);
+                Assert.Equal(expectedKeys, actualKeys);
             }
         }
     }

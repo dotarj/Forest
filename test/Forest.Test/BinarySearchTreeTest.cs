@@ -2,97 +2,90 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
+using Xunit;
 
 namespace Forest.Test
 {
     public class BinarySearchTreeTest
     {
-        protected static BinarySearchTree<int, int> tree;
+        protected BinarySearchTree<int, int> tree;
 
-        [TestClass]
         public class TheAddMethod : BinarySearchTreeTest
         {
-            [TestInitialize]
-            public void TestInitialize()
+            public TheAddMethod()
             {
                 tree = new BinarySearchTree<int, int>() { { 1, 1 } };
             }
 
-            [TestMethod, ExpectedException(typeof(ArgumentException))]
+            [Fact]
             public void ShouldThrowArgumentException()
             {
-                tree.Add(1, 1);
+                Assert.Throws<ArgumentException>(() => tree.Add(1, 1));
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldAddNodeWithKeyTwo()
             {
                 tree.Add(2, 2);
 
-                Assert.IsTrue(tree.ContainsKey(2));
+                Assert.True(tree.ContainsKey(2));
             }
         }
 
-        [TestClass]
         public class TheClearMethod : BinarySearchTreeTest
         {
-            [TestInitialize]
-            public void TestInitialize()
+            public TheClearMethod()
             {
                 tree = new BinarySearchTree<int, int>() { { 1, 1 } };
             }
 
-            [TestMethod]
+            [Fact]
             public void CountShouldEqualZero()
             {
                 tree.Clear();
 
-                Assert.AreEqual(0, tree.Count);
+                Assert.Equal(0, tree.Count);
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldNotContainKey()
             {
                 tree.Clear();
 
-                Assert.IsFalse(tree.ContainsKey(1));
+                Assert.False(tree.ContainsKey(1));
             }
         }
 
-        [TestClass]
         public class TheContainsMethod : BinarySearchTreeTest
         {
-            [TestInitialize]
-            public void TestInitialize()
+            public TheContainsMethod()
             {
                 tree = new BinarySearchTree<int, int>();
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnTrue()
             {
                 var node = new BinarySearchTreeNode<int, int>(1, 1);
 
                 tree.Add(node);
 
-                Assert.IsTrue(tree.Contains(node));
+                Assert.True(tree.Contains(node));
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnFalse()
             {
                 var node = new BinarySearchTreeNode<int, int>(1, 1);
 
-                Assert.IsFalse(tree.Contains(node));
+                Assert.False(tree.Contains(node));
             }
         }
 
-        [TestClass]
         public class TheCopyToMethod : BinarySearchTreeTest
         {
-            [TestInitialize]
-            public void TestInitialize()
+            public TheCopyToMethod()
             {
                 tree = new BinarySearchTree<int, int>();
 
@@ -107,7 +100,7 @@ namespace Forest.Test
                 tree.Add(10, 10);
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldCopyNodesInOrder()
             {
                 var expectedResults = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 9, 10 };
@@ -116,44 +109,33 @@ namespace Forest.Test
 
                 tree.CopyTo(array, 0);
 
-                var index = 0;
-
-                foreach (var value in array)
-                {
-                    Assert.AreEqual(expectedResults[index], value.Value);
-
-                    index++;
-                }
+                Assert.Equal(expectedResults, array.Select(value => value.Value).ToList());
             }
         }
 
-        [TestClass]
         public class TheContainsKeyMethod : BinarySearchTreeTest
         {
-            [TestInitialize]
-            public void TestInitialize()
+            public TheContainsKeyMethod()
             {
                 tree = new BinarySearchTree<int, int>() { { 1, 1 } };
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnTrue()
             {
-                Assert.IsTrue(tree.ContainsKey(1));
+                Assert.True(tree.ContainsKey(1));
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnFalse()
             {
-                Assert.IsFalse(tree.ContainsKey(2));
+                Assert.False(tree.ContainsKey(2));
             }
         }
 
-        [TestClass]
         public class TheCountProperty : BinarySearchTreeTest
         {
-            [TestInitialize]
-            public void TestInitialize()
+            public TheCountProperty()
             {
                 tree = new BinarySearchTree<int, int>();
 
@@ -168,18 +150,16 @@ namespace Forest.Test
                 tree.Add(10, 10);
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldEqualNine()
             {
-                Assert.AreEqual(9, tree.Count);
+                Assert.Equal(9, tree.Count);
             }
         }
 
-        [TestClass]
         public class TheGetEnumeratorMethod : BinarySearchTreeTest
         {
-            [TestInitialize]
-            public void TestInitialize()
+            public TheGetEnumeratorMethod()
             {
                 tree = new BinarySearchTree<int, int>();
 
@@ -194,7 +174,7 @@ namespace Forest.Test
                 tree.Add(10, 10);
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnNodesInOrder()
             {
                 var expectedResults = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 9, 10 };
@@ -203,23 +183,21 @@ namespace Forest.Test
 
                 foreach (var value in tree)
                 {
-                    Assert.AreEqual(expectedResults[index], value.Value);
+                    Assert.Equal(expectedResults[index], value.Value);
 
                     index++;
                 }
             }
         }
 
-        [TestClass]
         public class TheGetKeysMethod : BinarySearchTreeTest
         {
-            [TestInitialize]
-            public void TestInitialize()
+            public TheGetKeysMethod()
             {
                 tree = new BinarySearchTree<int, int>() { { 5, 5 }, { 2, 2 }, { 7, 7 }, { 1, 1 }, { 3, 3 }, { 9, 9 } };
             }
 
-            [TestMethod]
+            [Fact]
             public void DefaultShouldReturnKeysInOrder()
             {
                 var expectedResults = new List<int>() { 1, 2, 3, 5, 7, 9 };
@@ -228,13 +206,13 @@ namespace Forest.Test
 
                 foreach (var value in tree.GetKeys())
                 {
-                    Assert.AreEqual(expectedResults[index], value);
+                    Assert.Equal(expectedResults[index], value);
 
                     index++;
                 }
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnKeysPreOrder()
             {
                 var expectedResults = new List<int>() { 5, 2, 1, 3, 7, 9 };
@@ -243,13 +221,13 @@ namespace Forest.Test
 
                 foreach (var value in tree.GetKeys(BinaryTraversalMethod.PreOrder))
                 {
-                    Assert.AreEqual(expectedResults[index], value);
+                    Assert.Equal(expectedResults[index], value);
 
                     index++;
                 }
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnKeysInOrder()
             {
                 var expectedResults = new List<int>() { 1, 2, 3, 5, 7, 9 };
@@ -258,13 +236,13 @@ namespace Forest.Test
 
                 foreach (var value in tree.GetKeys(BinaryTraversalMethod.InOrder))
                 {
-                    Assert.AreEqual(expectedResults[index], value);
+                    Assert.Equal(expectedResults[index], value);
 
                     index++;
                 }
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnKeysPostOrder()
             {
                 var expectedResults = new List<int>() { 1, 3, 2, 9, 7, 5 };
@@ -273,23 +251,21 @@ namespace Forest.Test
 
                 foreach (var value in tree.GetKeys(BinaryTraversalMethod.PostOrder))
                 {
-                    Assert.AreEqual(expectedResults[index], value);
+                    Assert.Equal(expectedResults[index], value);
 
                     index++;
                 }
             }
         }
 
-        [TestClass]
         public class TheGetNodesMethod : BinarySearchTreeTest
         {
-            [TestInitialize]
-            public void TestInitialize()
+            public TheGetNodesMethod()
             {
                 tree = new BinarySearchTree<int, int>() { { 5, 5 }, { 2, 2 }, { 7, 7 }, { 1, 1 }, { 3, 3 }, { 9, 9 } };
             }
 
-            [TestMethod]
+            [Fact]
             public void DefaultShouldReturnNodesInOrder()
             {
                 var expectedResults = new List<int>() { 1, 2, 3, 5, 7, 9 };
@@ -298,13 +274,13 @@ namespace Forest.Test
 
                 foreach (var value in tree.GetNodes())
                 {
-                    Assert.AreEqual(expectedResults[index], value.Value);
+                    Assert.Equal(expectedResults[index], value.Value);
 
                     index++;
                 }
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnNodesPreOrder()
             {
                 var expectedResults = new List<int>() { 5, 2, 1, 3, 7, 9 };
@@ -313,13 +289,13 @@ namespace Forest.Test
 
                 foreach (var value in tree.GetNodes(BinaryTraversalMethod.PreOrder))
                 {
-                    Assert.AreEqual(expectedResults[index], value.Value);
+                    Assert.Equal(expectedResults[index], value.Value);
 
                     index++;
                 }
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnNodesInOrder()
             {
                 var expectedResults = new List<int>() { 1, 2, 3, 5, 7, 9 };
@@ -328,13 +304,13 @@ namespace Forest.Test
 
                 foreach (var value in tree.GetNodes(BinaryTraversalMethod.InOrder))
                 {
-                    Assert.AreEqual(expectedResults[index], value.Value);
+                    Assert.Equal(expectedResults[index], value.Value);
 
                     index++;
                 }
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnNodesPostOrder()
             {
                 var expectedResults = new List<int>() { 1, 3, 2, 9, 7, 5 };
@@ -343,23 +319,21 @@ namespace Forest.Test
 
                 foreach (var value in tree.GetNodes(BinaryTraversalMethod.PostOrder))
                 {
-                    Assert.AreEqual(expectedResults[index], value.Value);
+                    Assert.Equal(expectedResults[index], value.Value);
 
                     index++;
                 }
             }
         }
 
-        [TestClass]
         public class TheGetValuesMethod : BinarySearchTreeTest
         {
-            [TestInitialize]
-            public void TestInitialize()
+            public TheGetValuesMethod()
             {
                 tree = new BinarySearchTree<int, int>() { { 5, 5 }, { 2, 2 }, { 7, 7 }, { 1, 1 }, { 3, 3 }, { 9, 9 } };
             }
 
-            [TestMethod]
+            [Fact]
             public void DefaultShouldReturnValuesInOrder()
             {
                 var expectedResults = new List<int>() { 1, 2, 3, 5, 7, 9 };
@@ -368,13 +342,13 @@ namespace Forest.Test
 
                 foreach (var value in tree.GetValues())
                 {
-                    Assert.AreEqual(expectedResults[index], value);
+                    Assert.Equal(expectedResults[index], value);
 
                     index++;
                 }
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnValuesPreOrder()
             {
                 var expectedResults = new List<int>() { 5, 2, 1, 3, 7, 9 };
@@ -383,13 +357,13 @@ namespace Forest.Test
 
                 foreach (var value in tree.GetValues(BinaryTraversalMethod.PreOrder))
                 {
-                    Assert.AreEqual(expectedResults[index], value);
+                    Assert.Equal(expectedResults[index], value);
 
                     index++;
                 }
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnValuesInOrder()
             {
                 var expectedResults = new List<int>() { 1, 2, 3, 5, 7, 9 };
@@ -398,75 +372,64 @@ namespace Forest.Test
 
                 foreach (var value in tree.GetValues(BinaryTraversalMethod.InOrder))
                 {
-                    Assert.AreEqual(expectedResults[index], value);
+                    Assert.Equal(expectedResults[index], value);
 
                     index++;
                 }
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnValuesPostOrder()
             {
                 var expectedResults = new List<int>() { 1, 3, 2, 9, 7, 5 };
 
-                var index = 0;
-
-                foreach (var value in tree.GetValues(BinaryTraversalMethod.PostOrder))
-                {
-                    Assert.AreEqual(expectedResults[index], value);
-
-                    index++;
-                }
+                Assert.Equal(expectedResults, tree.GetValues(BinaryTraversalMethod.PostOrder).ToList());
             }
         }
 
-        [TestClass]
         public class TheIndexerMethod : BinarySearchTreeTest
         {
-            [TestInitialize]
-            public void TestInitialize()
+            public TheIndexerMethod()
             {
                 tree = new BinarySearchTree<int, int>() { { 1, 1 } };
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnTwo()
             {
                 tree[1] = 2;
 
-                Assert.AreEqual(2, tree[1]);
+                Assert.Equal(2, tree[1]);
             }
 
-            [TestMethod, ExpectedException(typeof(KeyNotFoundException))]
+            [Fact]
             public void ShouldThrowKeyNotFoundException()
             {
-                var value = tree[2];
+                Assert.Throws<KeyNotFoundException>(() => tree[2]);
             }
         }
 
-        [TestClass]
         public class TheRemoveMethod : BinarySearchTreeTest
         {
-            [TestInitialize]
-            public void TestInitialize()
+            public TheRemoveMethod()
             {
                 tree = new BinarySearchTree<int, int>() { { 5, 5 }, { 2, 2 }, { 7, 7 }, { 1, 1 }, { 9, 9 }, { 6, 6 }, { 10, 10 }, };
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldRemoveNode()
             {
-                Assert.IsTrue(tree.Remove(1));
-                Assert.IsFalse(tree.ContainsKey(1));
+                Assert.True(tree.Remove(1));
+                Assert.False(tree.ContainsKey(1));
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldNotRemoveNode()
             {
-                Assert.IsFalse(tree.Remove(8));
+                Assert.False(tree.Remove(8));
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReplaceRemovedNodeByLeftNode()
             {
                 var expectedValues = new List<int>() { 1, 5, 6, 7, 9, 10 };
@@ -477,13 +440,13 @@ namespace Forest.Test
 
                 foreach (var node in tree.GetNodes(BinaryTraversalMethod.InOrder))
                 {
-                    Assert.AreEqual(expectedValues[index], node.Value);
+                    Assert.Equal(expectedValues[index], node.Value);
 
                     index++;
                 }
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReplaceRemovedNodeByRightNode()
             {
                 var expectedValues = new List<int>() { 1, 2, 5, 6, 9, 10 };
@@ -494,13 +457,13 @@ namespace Forest.Test
 
                 foreach (var node in tree.GetNodes(BinaryTraversalMethod.InOrder))
                 {
-                    Assert.AreEqual(expectedValues[index], node.Value);
+                    Assert.Equal(expectedValues[index], node.Value);
 
                     index++;
                 }
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReplaceRemovedNodeByMinimumOfRightNode()
             {
                 var expectedValues = new List<int>() { 1, 2, 6, 7, 9, 10 };
@@ -509,42 +472,40 @@ namespace Forest.Test
 
                 tree.Remove(5);
 
-                Assert.AreEqual(6, tree.Root.Value);
+                Assert.Equal(6, tree.Root.Value);
 
                 foreach (var node in tree.GetNodes(BinaryTraversalMethod.InOrder))
                 {
-                    Assert.AreEqual(expectedValues[index], node.Value);
+                    Assert.Equal(expectedValues[index], node.Value);
 
                     index++;
                 }
             }
         }
 
-        [TestClass]
         public class TheTryGetValueMethod : BinarySearchTreeTest
         {
-            [TestInitialize]
-            public void TestInitialize()
+            public TheTryGetValueMethod()
             {
                 tree = new BinarySearchTree<int, int>() { { 1, 1 } };
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnTrueAndOne()
             {
                 var value = 0;
 
-                Assert.IsTrue(tree.TryGetValue(1, out value));
-                Assert.AreEqual(1, value);
+                Assert.True(tree.TryGetValue(1, out value));
+                Assert.Equal(1, value);
             }
 
-            [TestMethod]
+            [Fact]
             public void ShouldReturnFalseAndZero()
             {
                 var value = 0;
 
-                Assert.IsFalse(tree.TryGetValue(2, out value));
-                Assert.AreEqual(0, value);
+                Assert.False(tree.TryGetValue(2, out value));
+                Assert.Equal(0, value);
             }
         }
     }
