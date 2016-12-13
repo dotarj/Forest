@@ -217,6 +217,7 @@ namespace Forest
             return false;
         }
 
+        // Temporary method for unit testing. Remove (and make $base, check and tail readonly) if Add method is implemented.
         public void SetArrays(int[] @base, int[] check, char[] tail)
         {
             this.@base = @base;
