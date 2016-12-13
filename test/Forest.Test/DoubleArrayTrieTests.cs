@@ -3,11 +3,11 @@ using Xunit;
 
 namespace Forest.Test
 {
-    //public class DoubleArrayTrieTests
-    //{
-        public class TheAddMethod
+    public abstract class DoubleArrayTrieTests
+    {
+        public class TheAddMethod : DoubleArrayTrieTests
         {
-            //[Fact]
+            [Fact]
             public void ShouldThrowIfKeyIsNull()
             {
                 // Arrange
@@ -18,7 +18,7 @@ namespace Forest.Test
                 Assert.Throws<ArgumentNullException>(() => trie.Add(key));
             }
 
-            //[Fact]
+            [Fact]
             public void ShouldAddKey()
             {
                 // Arrange
@@ -32,7 +32,7 @@ namespace Forest.Test
                 trie.ContainsKey(key);
             }
 
-            //[Fact]
+            [Fact]
             public void ShouldAddAKeyWithoutCollisions()
             {
                 // Arrange
@@ -48,7 +48,7 @@ namespace Forest.Test
                 trie.ContainsKey(key);
             }
 
-            //[Fact]
+            [Fact]
             public void ShouldAddAKeyWithCollisions1()
             {
                 // Arrange
@@ -65,7 +65,7 @@ namespace Forest.Test
                 trie.ContainsKey(key);
             }
 
-            //[Fact]
+            [Fact]
             public void ShouldAddAKeyWithCollisions2()
             {
                 // Arrange
@@ -84,7 +84,7 @@ namespace Forest.Test
             }
         }
 
-        public class TheContainsKeyMethod
+        public class TheContainsKeyMethod : DoubleArrayTrieTests
         {
             [Fact]
             public void ShouldThrowIfKeyIsNull()
@@ -114,5 +114,5 @@ namespace Forest.Test
                 Assert.True(trie.ContainsKey(key));
             }
         }
-    //}
+    }
 }
