@@ -88,11 +88,11 @@ namespace Forest
                 else
                 {
                     // TODO: Should this be an exception?
-                    return false;
+                    break;
                 }
             }
 
-            // TODO: Add debug logging.
+            Debug.WriteLine($"DoubleArrayTrie.ContainsKey({key})':  Key '{key}' not matched.");
 
             return false;
         }
@@ -132,6 +132,8 @@ namespace Forest
                     break;
                 }
 
+                Debug.WriteLine($"DoubleArrayTrie.CheckTailValue({key}, {keyOffset}, {tailOffset}): Character '{key[keyIndex]}' matched.");
+
                 // The value in tail matches the character value, which indicates that the character matched. The last
                 // character of the key has been reached. If the next character in tail matches the terminator value
                 // the key matched.
@@ -147,14 +149,17 @@ namespace Forest
                     // The value in tail matches the terminator value, which indicates that matching is successful.
                     if (tailValue == terminator)
                     {
+                        Debug.WriteLine($"DoubleArrayTrie.CheckTailValue({key}, {keyOffset}, {tailOffset}): Key '{key}' matched.");
+
                         return true;
                     }
                 }
 
                 // The value in tail matches the character value, which indicates that the character matched. Proceed
                 // to the next character.
-                Debug.WriteLine($"DoubleArrayTrie.CheckTailValue({key}, {keyOffset}, {tailOffset}): Character '{key[keyIndex]}' matched.");
             }
+
+            Debug.WriteLine($"DoubleArrayTrie.CheckTailValue({key}, {keyOffset}, {tailOffset}): Key '{key}' not matched.");
 
             return false;
         }
