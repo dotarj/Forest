@@ -3,11 +3,11 @@ using Xunit;
 
 namespace Forest.Test
 {
-    public class DoubleArrayTrieTests
-    {
+    //public class DoubleArrayTrieTests
+    //{
         public class TheAddMethod
         {
-            [Fact]
+            //[Fact]
             public void ShouldThrowIfKeyIsNull()
             {
                 // Arrange
@@ -18,7 +18,7 @@ namespace Forest.Test
                 Assert.Throws<ArgumentNullException>(() => trie.Add(key));
             }
 
-            [Fact]
+            //[Fact]
             public void ShouldAddKey()
             {
                 // Arrange
@@ -32,7 +32,7 @@ namespace Forest.Test
                 trie.ContainsKey(key);
             }
 
-            [Fact]
+            //[Fact]
             public void ShouldAddAKeyWithoutCollisions()
             {
                 // Arrange
@@ -48,7 +48,7 @@ namespace Forest.Test
                 trie.ContainsKey(key);
             }
 
-            [Fact]
+            //[Fact]
             public void ShouldAddAKeyWithCollisions1()
             {
                 // Arrange
@@ -65,7 +65,7 @@ namespace Forest.Test
                 trie.ContainsKey(key);
             }
 
-            [Fact]
+            //[Fact]
             public void ShouldAddAKeyWithCollisions2()
             {
                 // Arrange
@@ -96,6 +96,23 @@ namespace Forest.Test
                 // Assert
                 Assert.Throws<ArgumentNullException>(() => trie.ContainsKey(key));
             }
+
+            [Fact]
+            public void ShouldReturnTrueIfKeyIsFound()
+            {
+                // Arrange
+                var key = "bachelor";
+                var trie = new DoubleArrayTrie();
+
+                var @base = new [] { 0, 4, 0, 1, -15, -1, -12, 1, 0, 0, 0, 0, 0, 0, 0, -9 };
+                var check = new [] { 0, 0, 0, 7,   3,  3,   3, 1, 0, 0, 0, 0, 0, 0, 0,  1 };
+                var tail = "0helor#??ar#ge#y#".ToCharArray();
+
+                trie.SetArrays(@base, check, tail);
+
+                // Assert
+                Assert.True(trie.ContainsKey(key));
+            }
         }
-    }
+    //}
 }
