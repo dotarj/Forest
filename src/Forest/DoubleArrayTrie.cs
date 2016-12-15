@@ -13,11 +13,23 @@ namespace Forest
         private int[] check = new int[64];
         private char[] tail = new char[64];
 
-        public void Add(string key)
+        /// <summary>
+        /// Adds the specified key to the <see cref="DoubleArrayTrie"/>.
+        /// </summary>
+        /// <param name="key">The key to add to the <see cref="DoubleArrayTrie"/>.</param>
+        /// <returns>true if the key is added to the <see cref="DoubleArrayTrie"/>; false if the key is already present.</returns>
+        /// <exception cref="ArgumentNullException">key is null.</exception>
+        public bool Add(string key)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Determines whether the <see cref="DoubleArrayTrie"/> contains an element with the specified key.
+        /// </summary>
+        /// <param name="key">The key to locate in the <see cref="DoubleArrayTrie"/>.</param>
+        /// <returns>true if the <see cref="DoubleArrayTrie"/> contains the key; otherwise, false.</returns>
+        /// <exception cref="ArgumentNullException">key is null.</exception>
         public bool ContainsKey(string key)
         {
             if (key == null)
