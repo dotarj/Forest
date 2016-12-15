@@ -13,6 +13,13 @@ namespace Forest
         private int[] check = new int[64];
         private char[] tail = new char[64];
 
+        private int tailPosition = 1;
+
+        public DoubleArrayTrie()
+        {
+            @base[1] = 1;
+        }
+
         /// <summary>
         /// Adds the specified key to the <see cref="DoubleArrayTrie"/>.
         /// </summary>
@@ -21,7 +28,51 @@ namespace Forest
         /// <exception cref="ArgumentNullException">key is null.</exception>
         public bool Add(string key)
         {
-            throw new NotImplementedException();
+            if (key == null)
+            {
+                throw new ArgumentNullException("key");
+            }
+
+            Debug.WriteLine($"DoubleArrayTrie.Add({key}): Executing.");
+
+            var baseIndex = 1;
+
+            for (var keyIndex = 0; keyIndex < key.Length; keyIndex++)
+            {
+                // Get the numerical value of the current character.
+                var characterValue = GetCharacterValue(key[keyIndex]);
+
+                var baseValue = GetBaseValue(baseIndex);
+                var checkValue = GetCheckValue(baseValue + characterValue);
+
+                if (checkValue == 0)
+                {
+                    SetBaseValue(baseValue + characterValue, -tailPosition);
+                    SetCheckValue(baseValue + characterValue, baseIndex);
+
+                    InsertInTail(key, keyIndex + 1, tailPosition);
+
+                    tailPosition = tailPosition + key.Length - keyIndex;
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void InsertInTail(string key, int keyOffset, int tailOffset)
+        {
+            var tailIndex = tailOffset;
+
+            for (int keyIndex = keyOffset; keyIndex < key.Length; keyIndex++, tailIndex++)
+            {
+                var character = key[keyIndex];
+
+                SetTailValue(tailIndex, character);
+            }
+
+            SetTailValue(tailIndex, terminator);
         }
 
         /// <summary>
@@ -201,6 +252,21 @@ namespace Forest
             return false;
         }
 
+        private int GetBaseValue(int index)
+        {
+            if (index >= @base.Length)
+            {
+                Array.Resize(ref @base, @base.Length * 2);
+            }
+
+            return @base[index];
+        }
+
+        private void SetBaseValue(int index, int value)
+        {
+            @base[index] = value;
+        }
+
         private bool TryGetCheckValue(int index, out int value)
         {
             if (index < check.Length)
@@ -215,6 +281,21 @@ namespace Forest
             return false;
         }
 
+        private void SetCheckValue(int index, int value)
+        {
+            check[index] = value;
+        }
+
+        private int GetCheckValue(int index)
+        {
+            if (index >= check.Length)
+            {
+                Array.Resize(ref check, check.Length * 2);
+            }
+
+            return check[index];
+        }
+
         private bool TryGetTailValue(int index, out char value)
         {
             if (index < tail.Length)
@@ -227,6 +308,16 @@ namespace Forest
             value = terminator;
 
             return false;
+        }
+
+        private void SetTailValue(int index, char value)
+        {
+            if (index >= tail.Length)
+            {
+                Array.Resize(ref tail, tail.Length * 2);
+            }
+
+            tail[index] = value;
         }
 
         // Temporary method for unit testing. Remove (and make $base, check and tail readonly) if Add method is implemented.
