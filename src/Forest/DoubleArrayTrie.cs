@@ -42,17 +42,26 @@ namespace Forest
                 // Get the numerical value of the current character.
                 var characterValue = GetCharacterValue(key[keyIndex]);
 
+                // Get the base value using the base index.
                 var baseValue = GetBaseValue(baseIndex);
+
+                // Get the check value using the base value and the character value.
                 var checkValue = GetCheckValue(baseValue + characterValue);
 
+                // A value equal to 0 indicates that the rest of the key is to be inserted in the tail.
                 if (checkValue == 0)
                 {
+                    // Set the base value using the base value and the character value. Use the negation of the tail
+                    // position as the new base value. This negative value indicates that the rest of the key is
+                    // inserted in the tail.
                     SetBaseValue(baseValue + characterValue, -tailPosition);
+
+                    // Set the check value using the base value and the character value. Use the base index as the new
+                    // value. This value indicates the node it comes from.
                     SetCheckValue(baseValue + characterValue, baseIndex);
 
-                    InsertInTail(key, keyIndex + 1, tailPosition);
-
-                    tailPosition = tailPosition + key.Length - keyIndex;
+                    // Store the rest of the key in the tail using the current tail position as the offset. 
+                    SetTailValues(key, keyIndex + 1, tailPosition);
 
                     return true;
                 }
@@ -61,7 +70,7 @@ namespace Forest
             return false;
         }
 
-        private void InsertInTail(string key, int keyOffset, int tailOffset)
+        private void SetTailValues(string key, int keyOffset, int tailOffset)
         {
             var tailIndex = tailOffset;
 
@@ -73,6 +82,9 @@ namespace Forest
             }
 
             SetTailValue(tailIndex, terminator);
+
+
+            tailPosition = tailPosition + key.Length - keyOffset;
         }
 
         /// <summary>
