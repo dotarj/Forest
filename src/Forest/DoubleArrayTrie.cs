@@ -180,7 +180,7 @@ namespace Forest
 
         private bool CheckTailValues(string key, int keyOffset, int tailOffset)
         {
-            Debug.WriteLine($"DoubleArrayTrie.CheckTailValue(\"{key}\", {keyOffset}, {tailOffset}): Executing.");
+            Debug.WriteLine($"DoubleArrayTrie.CheckTailValues(\"{key}\", {keyOffset}, {tailOffset}): Executing.");
 
             for (int keyIndex = keyOffset, tailIndex = tailOffset; keyIndex < key.Length; keyIndex++, tailIndex++)
             {
@@ -191,7 +191,7 @@ namespace Forest
                 // is smaller than the requested index.
                 if (!TryGetTailValue(tailIndex, out tailValue))
                 {
-                    Debug.WriteLine($"DoubleArrayTrie.CheckTailValue(\"{key}\", {keyOffset}, {tailOffset}): Character '{key[keyIndex]}' not matched.");
+                    Debug.WriteLine($"DoubleArrayTrie.CheckTailValues(\"{key}\", {keyOffset}, {tailOffset}): Character '{key[keyIndex]}' not matched.");
 
                     break;
                 }
@@ -200,7 +200,7 @@ namespace Forest
                 // inserted but not the current key.
                 if (tailValue == terminator)
                 {
-                    Debug.WriteLine($"DoubleArrayTrie.CheckTailValue(\"{key}\", {keyOffset}, {tailOffset}): Character '{key[keyIndex]}' not matched.");
+                    Debug.WriteLine($"DoubleArrayTrie.CheckTailValues(\"{key}\", {keyOffset}, {tailOffset}): Character '{key[keyIndex]}' not matched.");
 
                     break;
                 }
@@ -208,12 +208,12 @@ namespace Forest
                 // The value in tail does not match the character value.
                 if (tailValue != character)
                 {
-                    Debug.WriteLine($"DoubleArrayTrie.CheckTailValue(\"{key}\", {keyOffset}, {tailOffset}): Character '{key[keyIndex]}' not matched.");
+                    Debug.WriteLine($"DoubleArrayTrie.CheckTailValues(\"{key}\", {keyOffset}, {tailOffset}): Character '{key[keyIndex]}' not matched.");
 
                     break;
                 }
 
-                Debug.WriteLine($"DoubleArrayTrie.CheckTailValue(\"{key}\", {keyOffset}, {tailOffset}): Character '{key[keyIndex]}' matched.");
+                Debug.WriteLine($"DoubleArrayTrie.CheckTailValues(\"{key}\", {keyOffset}, {tailOffset}): Character '{key[keyIndex]}' matched.");
 
                 // The value in tail matches the character value, which indicates that the character matched. The last
                 // character of the key has been reached. If the next character in tail matches the terminator value
@@ -230,7 +230,7 @@ namespace Forest
                     // The value in tail matches the terminator value, which indicates that matching is successful.
                     if (tailValue == terminator)
                     {
-                        Debug.WriteLine($"DoubleArrayTrie.CheckTailValue(\"{key}\", {keyOffset}, {tailOffset}): Key '{key}' matched.");
+                        Debug.WriteLine($"DoubleArrayTrie.CheckTailValues(\"{key}\", {keyOffset}, {tailOffset}): Key '{key}' matched.");
 
                         return true;
                     }
