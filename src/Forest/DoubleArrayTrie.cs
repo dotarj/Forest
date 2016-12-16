@@ -88,7 +88,7 @@ namespace Forest
 
             SetTailValue(tailIndex, terminator);
 
-            tailPosition = tailPosition + key.Length - keyOffset;
+            tailPosition = tailPosition + key.Length - keyOffset + 1;
 
             Debug.WriteLine($"DoubleArrayTrie.SetTailValues(\"{key}\", {keyOffset}, {tailOffset})': Current tail position is now {tailPosition}.");
         }

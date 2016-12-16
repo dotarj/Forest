@@ -47,6 +47,22 @@ namespace Forest.Test
         }
 
         [Fact]
+        public void ShouldLeaveOtherKeyUntouchedAfterAddedAKeyWithoutCollisions2()
+        {
+            // Arrange
+            var key = "jar";
+            var trie = new DoubleArrayTrie();
+
+            trie.Add("bachelor");
+
+            // Act
+            trie.Add(key);
+
+            // Assert
+            trie.ContainsKey("bachelor");
+        }
+
+        [Fact]
         public void ShouldAddAKeyWithCollisions1()
         {
             // Arrange
