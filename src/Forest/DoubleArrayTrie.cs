@@ -274,14 +274,24 @@ namespace Forest
         {
             if (index >= @base.Length)
             {
-                Array.Resize(ref @base, @base.Length * 2);
+                return 0;
             }
 
             return @base[index];
         }
 
+        private void ResizeBaseIfNecessary(int index)
+        {
+            while (index >= @base.Length)
+            {
+                Array.Resize(ref @base, @base.Length * 2);
+            }
+        }
+
         private void SetBaseValue(int index, int value)
         {
+            ResizeBaseIfNecessary(index);
+
             Debug.WriteLine($"DoubleArrayTrie.SetBaseValue({index}, {value})': Updating base[{index}] to {value}.");
 
             @base[index] = value;
@@ -314,6 +324,8 @@ namespace Forest
 
         private void SetCheckValue(int index, int value)
         {
+            ResizeCheckIfNecessary(index);
+
             Debug.WriteLine($"DoubleArrayTrie.SetCheckValue({index}, {value})': Updating check[{index}] to {value}.");
 
             check[index] = value;
@@ -321,11 +333,19 @@ namespace Forest
             Debug.WriteLine(GetCurrentState());
         }
 
+        private void ResizeCheckIfNecessary(int index)
+        {
+            while (index >= check.Length)
+            {
+                Array.Resize(ref check, check.Length * 2);
+            }
+        }
+
         private int GetCheckValue(int index)
         {
             if (index >= check.Length)
             {
-                Array.Resize(ref check, check.Length * 2);
+                return 0;
             }
 
             return check[index];
@@ -347,16 +367,21 @@ namespace Forest
 
         private void SetTailValue(int index, char value)
         {
-            if (index >= tail.Length)
-            {
-                Array.Resize(ref tail, tail.Length * 2);
-            }
+            ResizeTailIfNecessary(index);
 
             Debug.WriteLine($"DoubleArrayTrie.SetTailValue({index}, {value})': Updating tail[{index}] to {value}.");
 
             tail[index] = value;
 
             Debug.WriteLine(GetCurrentState());
+        }
+
+        private void ResizeTailIfNecessary(int index)
+        {
+            while (index >= tail.Length)
+            {
+                Array.Resize(ref tail, tail.Length * 2);
+            }
         }
 
         // Temporary method for unit testing. Remove (and make $base, check and tail readonly) if Add method is implemented.
