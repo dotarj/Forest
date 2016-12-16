@@ -86,8 +86,10 @@ namespace Forest
                 SetTailValue(tailIndex, character);
             }
 
+            // Insert the terminator after the last character of the key. The terminator indicates the end of the key.
             SetTailValue(tailIndex, terminator);
 
+            // Update the tail position using the length of the remaining key + 1 for the terminator.
             tailPosition = tailPosition + key.Length - keyOffset + 1;
 
             Debug.WriteLine($"DoubleArrayTrie.SetTailValues(\"{key}\", {keyOffset}, {tailOffset})': Current tail position is now {tailPosition}.");
