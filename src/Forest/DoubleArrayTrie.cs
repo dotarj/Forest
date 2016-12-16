@@ -243,17 +243,6 @@ namespace Forest
             return false;
         }
 
-        private int GetCharacterValue(char character)
-        {
-            // Temporary method to retrieve character value.
-            if (character == '#')
-            {
-                return -1;
-            }
-
-            return (int)character - 95;
-        }
-
         private bool TryGetBaseValue(int index, out int value)
         {
             if (index < @base.Length)
@@ -278,16 +267,6 @@ namespace Forest
             return @base[index];
         }
 
-        private void ResizeBaseIfNecessary(int index)
-        {
-            while (index >= @base.Length)
-            {
-                Debug.WriteLine($"DoubleArrayTrie.ResizeBaseIfNecessary({index})': Resizing base to {@base.Length * 2}.");
-
-                Array.Resize(ref @base, @base.Length * 2);
-            }
-        }
-
         private void SetBaseValue(int index, int value)
         {
             ResizeBaseIfNecessary(index);
@@ -299,13 +278,14 @@ namespace Forest
             Debug.WriteLine(GetCurrentState());
         }
 
-        private string GetCurrentState()
+        private void ResizeBaseIfNecessary(int index)
         {
-            var baseValues = string.Join(",", @base.Select(value => value.ToString().PadLeft(4)));
-            var checkValues = string.Join(",", check.Select(value => value.ToString().PadLeft(4)));
-            var tailValues = string.Join(",", tail.Select(value => value.ToString().Replace('\0', ' ').PadLeft(4)));
+            while (index >= @base.Length)
+            {
+                Debug.WriteLine($"DoubleArrayTrie.ResizeBaseIfNecessary({index})': Resizing base to {@base.Length * 2}.");
 
-            return $"DoubleArrayTrie.GetCurrentState(): base:  {baseValues}\nDoubleArrayTrie.GetCurrentState(): check: {checkValues}\nDoubleArrayTrie.GetCurrentState(): tail:  {tailValues}";
+                Array.Resize(ref @base, @base.Length * 2);
+            }
         }
 
         private bool TryGetCheckValue(int index, out int value)
@@ -320,6 +300,16 @@ namespace Forest
             value = 0;
 
             return false;
+        }
+
+        private int GetCheckValue(int index)
+        {
+            if (index >= check.Length)
+            {
+                return 0;
+            }
+
+            return check[index];
         }
 
         private void SetCheckValue(int index, int value)
@@ -341,16 +331,6 @@ namespace Forest
 
                 Array.Resize(ref check, check.Length * 2);
             }
-        }
-
-        private int GetCheckValue(int index)
-        {
-            if (index >= check.Length)
-            {
-                return 0;
-            }
-
-            return check[index];
         }
 
         private bool TryGetTailValue(int index, out char value)
@@ -386,6 +366,26 @@ namespace Forest
 
                 Array.Resize(ref tail, tail.Length * 2);
             }
+        }
+
+        private int GetCharacterValue(char character)
+        {
+            // Temporary method to retrieve character value.
+            if (character == '#')
+            {
+                return -1;
+            }
+
+            return (int)character - 95;
+        }
+
+        private string GetCurrentState()
+        {
+            var baseValues = string.Join(",", @base.Select(value => value.ToString().PadLeft(4)));
+            var checkValues = string.Join(",", check.Select(value => value.ToString().PadLeft(4)));
+            var tailValues = string.Join(",", tail.Select(value => value.ToString().Replace('\0', ' ').PadLeft(4)));
+
+            return $"DoubleArrayTrie.GetCurrentState(): base:  {baseValues}\nDoubleArrayTrie.GetCurrentState(): check: {checkValues}\nDoubleArrayTrie.GetCurrentState(): tail:  {tailValues}";
         }
 
         // Temporary method for unit testing. Remove (and make $base, check and tail readonly) if Add method is implemented.
