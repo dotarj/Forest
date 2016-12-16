@@ -180,8 +180,6 @@ namespace Forest
 
         private bool CheckTailValues(string key, int keyOffset, int tailOffset)
         {
-            Debug.WriteLine($"DoubleArrayTrie.CheckTailValues(\"{key}\", {keyOffset}, {tailOffset}): Executing.");
-
             for (int keyIndex = keyOffset, tailIndex = tailOffset; keyIndex < key.Length; keyIndex++, tailIndex++)
             {
                 var character = key[keyIndex];
@@ -284,6 +282,8 @@ namespace Forest
         {
             while (index >= @base.Length)
             {
+                Debug.WriteLine($"DoubleArrayTrie.ResizeBaseIfNecessary({index})': Resizing base to {@base.Length * 2}.");
+
                 Array.Resize(ref @base, @base.Length * 2);
             }
         }
@@ -337,6 +337,8 @@ namespace Forest
         {
             while (index >= check.Length)
             {
+                Debug.WriteLine($"DoubleArrayTrie.ResizeCheckIfNecessary({index})': Resizing check to {check.Length * 2}.");
+
                 Array.Resize(ref check, check.Length * 2);
             }
         }
@@ -380,6 +382,8 @@ namespace Forest
         {
             while (index >= tail.Length)
             {
+                Debug.WriteLine($"DoubleArrayTrie.ResizeTailIfNecessary({index})': Resizing tail to {check.Length * 2}.");
+
                 Array.Resize(ref tail, tail.Length * 2);
             }
         }
