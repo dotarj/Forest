@@ -31,6 +31,22 @@ namespace Forest.Test
         }
 
         [Fact]
+        public void ShouldReturnFalseIfKeyIsAlreadyPresent()
+        {
+            // Arrange
+            var key = "bachelor";
+            var trie = new DoubleArrayTrie();
+
+            trie.Add(key);
+
+            // Act
+            trie.Add(key);
+
+            // Assert
+            trie.ContainsKey(key);
+        }
+
+        [Fact]
         public void ShouldAddAKeyWithoutCollisions()
         {
             // Arrange

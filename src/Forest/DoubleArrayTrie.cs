@@ -1,6 +1,7 @@
 // Copyright (c) Arjen Post. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -9,6 +10,7 @@ namespace Forest
     public class DoubleArrayTrie
     {
         private const char terminator = '#';
+        private const char garbage = '?';
 
         private int[] @base = new int[16];
         private int[] check = new int[16];
@@ -46,6 +48,59 @@ namespace Forest
                 // Get the base value using the base index.
                 var baseValue = GetBaseValue(baseIndex);
 
+                if (baseValue < 0)
+                {
+                    // Use the negation of the base value as the offset for further matching in the tail.
+                    var tailOffset = -baseValue;
+                    // Use the index of the next character as the offset for further matching in the tail.
+                    var keyOffset = keyIndex;
+
+                    // TODO DOC: The key is already added.
+                    if (CheckTailValues(key, keyOffset, tailOffset))
+                    {
+                        break;
+                    }
+
+                    var temp = -GetBaseValue(baseIndex);
+
+                    var commonCharacters = GetCommonPrefixCharacters(key, keyIndex, tailOffset).ToArray();
+
+                    int checkIndex = 0;
+
+                    for (var commonCharacterIndex = 0; commonCharacterIndex < commonCharacters.Length; commonCharacterIndex++)
+                    {
+                        var q = X_CHECK(new [] { commonCharacters[commonCharacterIndex] });
+
+                        checkIndex = q + GetCharacterValue(commonCharacters[commonCharacterIndex]);
+
+                        SetBaseValue(baseIndex, q);
+                        SetCheckValue(checkIndex, baseIndex);
+                    }
+
+                    var nextTailCharacter = tail[tailOffset + commonCharacters.Length];
+                    var nextKeyCharacter = key[keyIndex + commonCharacters.Length];
+
+                    var qq = X_CHECK(new [] { nextTailCharacter, nextKeyCharacter });
+
+                    SetBaseValue(checkIndex, qq);
+                    var newBase = qq + GetCharacterValue(nextTailCharacter);
+
+                    SetBaseValue(newBase, -temp);
+                    SetCheckValue(newBase, checkIndex);
+
+                    OverwriteTail(temp, key.Length - keyIndex - commonCharacters.Length);
+
+                    // TODO: Scenario 3, step 10
+                    var t = GetBaseValue(checkIndex) + GetCharacterValue(nextKeyCharacter);
+
+                    SetBaseValue(t, -tailPosition);
+                    SetCheckValue(t, checkIndex);
+
+                    SetTailValues(key, keyIndex + commonCharacters.Length + 1, tailPosition);
+
+                    return true;
+                }
+
                 // Get the check value using the base value and the character value.
                 var checkValue = GetCheckValue(baseValue + characterValue);
 
@@ -68,9 +123,78 @@ namespace Forest
 
                     return true;
                 }
+
+                baseIndex = baseValue + characterValue;
             }
 
             return false;
+        }
+
+        private void OverwriteTail(int oldOffset, int newOffset)
+        {
+            var terminatorReached = false;
+
+            for (int oldIndex = oldOffset, newIndex = newOffset; ; oldIndex++, newIndex++)
+            {
+                if (terminatorReached)
+                {
+                    if (tail[oldIndex] == terminator)
+                    {
+                        tail[oldIndex] = garbage;
+
+                        break;
+                    }
+
+                    tail[oldIndex] = garbage;
+
+                    continue;
+                }
+
+                tail[oldIndex] = tail[newIndex];
+
+                if (tail[newIndex] == terminator)
+                {
+                    terminatorReached = true;
+                }
+            }
+        }
+
+        private IEnumerable<char> GetCommonPrefixCharacters(string key, int keyOffset, int tailOffset)
+        {
+            for (int keyIndex = keyOffset, tailIndex = tailOffset; keyIndex < key.Length; keyIndex++, tailIndex++)
+            {
+                var keyValue = key[keyIndex];
+                var tailValue = tail[tailIndex];
+
+                if (keyValue != tailValue)
+                {
+                    yield break;
+                }
+
+                yield return key[keyOffset];
+            }
+        }
+
+        private int X_CHECK(char[] characters)
+        {
+            for (var q = 1; ; q++)
+            {
+                for (var characterIndex = 0; characterIndex < characters.Length; characterIndex++)
+                {
+                    var characterValue = GetCharacterValue(characters[characterIndex]);
+                    var checkIndex = q + characterIndex;
+
+                    if (check[checkIndex] != 0)
+                    {
+                        break;
+                    }
+
+                    if (characterIndex == characters.Length - 1)
+                    {
+                        return q;
+                    }
+                }
+            }
         }
 
         private void SetTailValues(string key, int keyOffset, int tailOffset)
@@ -240,7 +364,7 @@ namespace Forest
                 // to the next character.
             }
 
-            Debug.WriteLine($"DoubleArrayTrie.CheckTailValue(\"{key}\", {keyOffset}, {tailOffset}): Key '{key}' not matched.");
+            Debug.WriteLine($"DoubleArrayTrie.CheckTailValues(\"{key}\", {keyOffset}, {tailOffset}): Key '{key}' not matched.");
 
             return false;
         }
