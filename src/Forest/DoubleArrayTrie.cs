@@ -65,24 +65,25 @@ namespace Forest
 
                     var commonCharacters = GetCommonPrefixCharacters(key, keyIndex, tailOffset).ToArray();
 
-                    int checkIndex = 0;
+                    var checkIndex = 0;
 
                     for (var commonCharacterIndex = 0; commonCharacterIndex < commonCharacters.Length; commonCharacterIndex++)
                     {
-                        var q = X_CHECK(new [] { commonCharacters[commonCharacterIndex] });
+                        var availableBaseValue = GetAvailableBaseValue(new [] { commonCharacters[commonCharacterIndex] });
 
-                        checkIndex = q + GetCharacterValue(commonCharacters[commonCharacterIndex]);
+                        checkIndex = availableBaseValue + GetCharacterValue(commonCharacters[commonCharacterIndex]);
 
-                        SetBaseValue(baseIndex, q);
+                        SetBaseValue(baseIndex, availableBaseValue);
                         SetCheckValue(checkIndex, baseIndex);
                     }
 
                     var nextTailCharacter = tail[tailOffset + commonCharacters.Length];
                     var nextKeyCharacter = key[keyIndex + commonCharacters.Length];
 
-                    var qq = X_CHECK(new [] { nextTailCharacter, nextKeyCharacter });
+                    var qq = GetAvailableBaseValue(new [] { nextTailCharacter, nextKeyCharacter });
 
                     SetBaseValue(checkIndex, qq);
+
                     var newBase = qq + GetCharacterValue(nextTailCharacter);
 
                     SetBaseValue(newBase, -temp);
@@ -90,7 +91,6 @@ namespace Forest
 
                     OverwriteTail(temp, key.Length - keyIndex - commonCharacters.Length);
 
-                    // TODO: Scenario 3, step 10
                     var t = GetBaseValue(checkIndex) + GetCharacterValue(nextKeyCharacter);
 
                     SetBaseValue(t, -tailPosition);
@@ -175,14 +175,14 @@ namespace Forest
             }
         }
 
-        private int X_CHECK(char[] characters)
+        private int GetAvailableBaseValue(char[] characters)
         {
-            for (var q = 1; ; q++)
+            for (var baseValue = 1; ; baseValue++)
             {
                 for (var characterIndex = 0; characterIndex < characters.Length; characterIndex++)
                 {
                     var characterValue = GetCharacterValue(characters[characterIndex]);
-                    var checkIndex = q + characterIndex;
+                    var checkIndex = baseValue + characterIndex;
 
                     if (check[checkIndex] != 0)
                     {
@@ -191,7 +191,7 @@ namespace Forest
 
                     if (characterIndex == characters.Length - 1)
                     {
-                        return q;
+                        return baseValue;
                     }
                 }
             }
