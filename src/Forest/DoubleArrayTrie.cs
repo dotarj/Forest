@@ -42,26 +42,32 @@ namespace Forest
 
             for (var keyIndex = 0; keyIndex < key.Length; keyIndex++)
             {
-                // Get the numerical value of the current character.
-                var characterValue = GetCharacterValue(key[keyIndex]);
-
                 // Get the base value using the base index.
                 var baseValue = GetBaseValue(baseIndex);
 
+                // A negative base value indicates that further matching is to be performed in the tail.
                 if (baseValue < 0)
                 {
+                    Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): Proceed matching in tail.");
+
                     // Use the negation of the base value as the offset for further matching in the tail.
                     var tailOffset = -baseValue;
+
                     // Use the index of the next character as the offset for further matching in the tail.
                     var keyOffset = keyIndex;
 
-                    // TODO DOC: The key is already added.
+                    // Determine whether the key is already present. If so, return false as it is already added.
                     if (CheckTailValues(key, keyOffset, tailOffset))
                     {
+                        Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): The key '{key}' is already present.");
+
                         break;
                     }
 
-                    var temp = -GetBaseValue(baseIndex);
+                    Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): base[{baseIndex}] for character '{key[keyIndex]}' collision.");
+
+                    // Store the current base value for later use.
+                    var currentBaseValue = -baseValue;
 
                     var commonCharacters = GetCommonPrefixCharacters(key, keyIndex, tailOffset).ToArray();
 
@@ -86,20 +92,23 @@ namespace Forest
 
                     var newBase = qq + GetCharacterValue(nextTailCharacter);
 
-                    SetBaseValue(newBase, -temp);
+                    SetBaseValue(newBase, -currentBaseValue);
                     SetCheckValue(newBase, checkIndex);
 
-                    OverwriteTail(temp, key.Length - keyIndex - commonCharacters.Length);
+                    OverwriteTail(currentBaseValue, key.Length - keyIndex - commonCharacters.Length);
 
                     var t = GetBaseValue(checkIndex) + GetCharacterValue(nextKeyCharacter);
 
                     SetBaseValue(t, -tailPosition);
                     SetCheckValue(t, checkIndex);
 
-                    SetTailValues(key, keyIndex + commonCharacters.Length + 1, tailPosition);
+                    SetTailValues(key, keyIndex + commonCharacters.Length + 1);
 
                     return true;
                 }
+
+                // Get the numerical value of the current character.
+                var characterValue = GetCharacterValue(key[keyIndex]);
 
                 // Get the check value using the base value and the character value.
                 var checkValue = GetCheckValue(baseValue + characterValue);
@@ -107,7 +116,7 @@ namespace Forest
                 // A value equal to 0 indicates that the rest of the key is to be inserted in the tail.
                 if (checkValue == 0)
                 {
-                    Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\")': base[{baseValue + characterValue}] for character '{key[keyIndex]}' available.");
+                    Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): base[{baseValue + characterValue}] for character '{key[keyIndex]}' available.");
 
                     // Set the base value using the base value and the character value. Use the negation of the tail
                     // position as the new base value. This negative value indicates that the rest of the key is
@@ -119,10 +128,12 @@ namespace Forest
                     SetCheckValue(baseValue + characterValue, baseIndex);
 
                     // Store the rest of the key in the tail using the current tail position as the offset. 
-                    SetTailValues(key, keyIndex + 1, tailPosition);
+                    SetTailValues(key, keyIndex + 1);
 
                     return true;
                 }
+
+                Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): Character '{key[keyIndex]}' matched.");
 
                 baseIndex = baseValue + characterValue;
             }
@@ -197,11 +208,11 @@ namespace Forest
             }
         }
 
-        private void SetTailValues(string key, int keyOffset, int tailOffset)
+        private void SetTailValues(string key, int keyOffset)
         {
-            Debug.WriteLine($"DoubleArrayTrie.SetTailValues(\"{key}\", {keyOffset}, {tailOffset})': Writing remaining key '{key.Substring(keyOffset)}' to tail starting from offset {tailOffset}.");
+            Debug.WriteLine($"DoubleArrayTrie.SetTailValues(\"{key}\", {keyOffset}): Writing remaining key '{key.Substring(keyOffset)}' to tail starting from offset {tailPosition}.");
 
-            var tailIndex = tailOffset;
+            var tailIndex = tailPosition;
 
             for (int keyIndex = keyOffset; keyIndex < key.Length; keyIndex++, tailIndex++)
             {
@@ -216,7 +227,7 @@ namespace Forest
             // Update the tail position using the length of the remaining key + 1 for the terminator.
             tailPosition = tailPosition + key.Length - keyOffset + 1;
 
-            Debug.WriteLine($"DoubleArrayTrie.SetTailValues(\"{key}\", {keyOffset}, {tailOffset})': Current tail position is now {tailPosition}.");
+            Debug.WriteLine($"DoubleArrayTrie.SetTailValues(\"{key}\", {keyOffset}): Current tail position is now {tailPosition}.");
         }
 
         /// <summary>
@@ -248,7 +259,7 @@ namespace Forest
                 // is smaller than the requested index.
                 if (!TryGetBaseValue(baseIndex, out baseValue))
                 {
-                    Debug.WriteLine($"DoubleArrayTrie.ContainsKey(\"{key}\")': Character '{key[keyIndex]}' not matched.");
+                    Debug.WriteLine($"DoubleArrayTrie.ContainsKey(\"{key}\"): Character '{key[keyIndex]}' not matched.");
 
                     break;
                 }
@@ -260,7 +271,7 @@ namespace Forest
                     // false if the check array length is smaller than the requested index.
                     if (!TryGetCheckValue(baseValue + characterValue, out checkValue))
                     {
-                        Debug.WriteLine($"DoubleArrayTrie.ContainsKey(\"{key}\")': Character '{key[keyIndex]}' not matched.");
+                        Debug.WriteLine($"DoubleArrayTrie.ContainsKey(\"{key}\"): Character '{key[keyIndex]}' not matched.");
 
                         break;
                     }
@@ -269,12 +280,12 @@ namespace Forest
                     // did not match.
                     if (checkValue != baseIndex)
                     {
-                        Debug.WriteLine($"DoubleArrayTrie.ContainsKey(\"{key}\")': Character '{key[keyIndex]}' not matched.");
+                        Debug.WriteLine($"DoubleArrayTrie.ContainsKey(\"{key}\"): Character '{key[keyIndex]}' not matched.");
 
                         break;
                     }
 
-                    Debug.WriteLine($"DoubleArrayTrie.ContainsKey(\"{key}\")': Character '{key[keyIndex]}' matched.");
+                    Debug.WriteLine($"DoubleArrayTrie.ContainsKey(\"{key}\"): Character '{key[keyIndex]}' matched.");
 
                     // The value in check matches the current base index, which indicates that the character matched.
                     // The base value + the character value is the new base index. Proceed to the next character.
@@ -283,7 +294,7 @@ namespace Forest
                 // A negative value indicates that the rest of the key is located in the tail.
                 else if (baseValue < 0)
                 {
-                    Debug.WriteLine($"DoubleArrayTrie.ContainsKey(\"{key}\")': Character '{key[keyIndex]}' matched. Proceed matching in tail.");
+                    Debug.WriteLine($"DoubleArrayTrie.ContainsKey(\"{key}\"): Proceed matching in tail.");
 
                     // Use the negation of the base value as the offset for further matching in the tail.
                     var tailOffset = -baseValue;
@@ -299,7 +310,7 @@ namespace Forest
                 }
             }
 
-            Debug.WriteLine($"DoubleArrayTrie.ContainsKey(\"{key}\")':  Key '{key}' not matched.");
+            Debug.WriteLine($"DoubleArrayTrie.ContainsKey(\"{key}\"):  Key '{key}' not matched.");
 
             return false;
         }
@@ -397,7 +408,7 @@ namespace Forest
         {
             ResizeBaseIfNecessary(index);
 
-            Debug.WriteLine($"DoubleArrayTrie.SetBaseValue({index}, {value})': Updating base[{index}] to {value}.");
+            Debug.WriteLine($"DoubleArrayTrie.SetBaseValue({index}, {value}): Updating base[{index}] to {value}.");
 
             @base[index] = value;
 
@@ -408,7 +419,7 @@ namespace Forest
         {
             while (index >= @base.Length)
             {
-                Debug.WriteLine($"DoubleArrayTrie.ResizeBaseIfNecessary({index})': Resizing base to {@base.Length * 2}.");
+                Debug.WriteLine($"DoubleArrayTrie.ResizeBaseIfNecessary({index}): Resizing base to {@base.Length * 2}.");
 
                 Array.Resize(ref @base, @base.Length * 2);
             }
@@ -442,7 +453,7 @@ namespace Forest
         {
             ResizeCheckIfNecessary(index);
 
-            Debug.WriteLine($"DoubleArrayTrie.SetCheckValue({index}, {value})': Updating check[{index}] to {value}.");
+            Debug.WriteLine($"DoubleArrayTrie.SetCheckValue({index}, {value}): Updating check[{index}] to {value}.");
 
             check[index] = value;
 
@@ -453,7 +464,7 @@ namespace Forest
         {
             while (index >= check.Length)
             {
-                Debug.WriteLine($"DoubleArrayTrie.ResizeCheckIfNecessary({index})': Resizing check to {check.Length * 2}.");
+                Debug.WriteLine($"DoubleArrayTrie.ResizeCheckIfNecessary({index}): Resizing check to {check.Length * 2}.");
 
                 Array.Resize(ref check, check.Length * 2);
             }
@@ -477,7 +488,7 @@ namespace Forest
         {
             ResizeTailIfNecessary(index);
 
-            Debug.WriteLine($"DoubleArrayTrie.SetTailValue({index}, {value})': Updating tail[{index}] to {value}.");
+            Debug.WriteLine($"DoubleArrayTrie.SetTailValue({index}, {value}): Updating tail[{index}] to '{value}'.");
 
             tail[index] = value;
 
@@ -488,7 +499,7 @@ namespace Forest
         {
             while (index >= tail.Length)
             {
-                Debug.WriteLine($"DoubleArrayTrie.ResizeTailIfNecessary({index})': Resizing tail to {check.Length * 2}.");
+                Debug.WriteLine($"DoubleArrayTrie.ResizeTailIfNecessary({index}): Resizing tail to {check.Length * 2}.");
 
                 Array.Resize(ref tail, tail.Length * 2);
             }
