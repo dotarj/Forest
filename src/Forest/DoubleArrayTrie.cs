@@ -191,7 +191,7 @@ namespace Forest
                     yield break;
                 }
 
-                yield return key[keyOffset];
+                yield return key[keyIndex];
             }
         }
 
