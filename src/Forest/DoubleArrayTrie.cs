@@ -66,43 +66,7 @@ namespace Forest
 
                     Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): base[{baseIndex}] for character '{key[keyIndex]}' collision.");
 
-                    // Store the current base value for later use.
-                    var currentBaseValue = -baseValue;
-
-                    var commonCharacters = GetCommonPrefixCharacters(key, keyIndex, tailOffset).ToArray();
-
-                    var checkIndex = 0;
-
-                    for (var commonCharacterIndex = 0; commonCharacterIndex < commonCharacters.Length; commonCharacterIndex++)
-                    {
-                        var availableBaseValue = GetAvailableBaseValue(new [] { commonCharacters[commonCharacterIndex] });
-
-                        checkIndex = availableBaseValue + GetCharacterValue(commonCharacters[commonCharacterIndex]);
-
-                        SetBaseValue(baseIndex, availableBaseValue);
-                        SetCheckValue(checkIndex, baseIndex);
-                    }
-
-                    var nextTailCharacter = tail[tailOffset + commonCharacters.Length];
-                    var nextKeyCharacter = key[keyIndex + commonCharacters.Length];
-
-                    var qq = GetAvailableBaseValue(new [] { nextTailCharacter, nextKeyCharacter });
-
-                    SetBaseValue(checkIndex, qq);
-
-                    var newBase = qq + GetCharacterValue(nextTailCharacter);
-
-                    SetBaseValue(newBase, -currentBaseValue);
-                    SetCheckValue(newBase, checkIndex);
-
-                    OverwriteTail(currentBaseValue, key.Length - keyIndex - commonCharacters.Length);
-
-                    var t = GetBaseValue(checkIndex) + GetCharacterValue(nextKeyCharacter);
-
-                    SetBaseValue(t, -tailPosition);
-                    SetCheckValue(t, checkIndex);
-
-                    SetTailValues(key, keyIndex + commonCharacters.Length + 1);
+                    ResolveConflict(key, keyOffset, baseIndex);
 
                     return true;
                 }
@@ -139,6 +103,51 @@ namespace Forest
             }
 
             return false;
+        }
+
+        private void ResolveConflict(string key, int keyOffset, int baseIndex)
+        {
+            // Store the current base value for later use.
+            var currentBaseValue = -GetBaseValue(baseIndex);
+
+            var tailOffset = currentBaseValue;
+
+            var commonCharacters = GetCommonPrefixCharacters(key, keyOffset, tailOffset).ToArray();
+
+            Debug.WriteLine($"DoubleArrayTrie.ResolveConflict(\"{key}\", {keyOffset}, {baseIndex}): Common characters: {string.Join(", ", commonCharacters)}.");
+
+            var checkIndex = 0;
+
+            for (var commonCharacterIndex = 0; commonCharacterIndex < commonCharacters.Length; commonCharacterIndex++)
+            {
+                var availableBaseValue = GetAvailableBaseValue(new[] { commonCharacters[commonCharacterIndex] });
+
+                checkIndex = availableBaseValue + GetCharacterValue(commonCharacters[commonCharacterIndex]);
+
+                SetBaseValue(baseIndex, availableBaseValue);
+                SetCheckValue(checkIndex, baseIndex);
+            }
+
+            var nextTailCharacter = tail[tailOffset + commonCharacters.Length];
+            var nextKeyCharacter = key[keyOffset + commonCharacters.Length];
+
+            var qq = GetAvailableBaseValue(new[] { nextTailCharacter, nextKeyCharacter });
+
+            SetBaseValue(checkIndex, qq);
+
+            var newBase = qq + GetCharacterValue(nextTailCharacter);
+
+            SetBaseValue(newBase, -currentBaseValue);
+            SetCheckValue(newBase, checkIndex);
+
+            OverwriteTail(currentBaseValue, key.Length - keyOffset - commonCharacters.Length);
+
+            var t = GetBaseValue(checkIndex) + GetCharacterValue(nextKeyCharacter);
+
+            SetBaseValue(t, -tailPosition);
+            SetCheckValue(t, checkIndex);
+
+            SetTailValues(key, keyOffset + commonCharacters.Length + 1);
         }
 
         private void OverwriteTail(int oldOffset, int newOffset)
