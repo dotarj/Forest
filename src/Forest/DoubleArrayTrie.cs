@@ -202,7 +202,7 @@ namespace Forest
                 for (var characterIndex = 0; characterIndex < characters.Length; characterIndex++)
                 {
                     var characterValue = GetCharacterValue(characters[characterIndex]);
-                    var checkIndex = baseValue + characterIndex;
+                    var checkIndex = baseValue + characterValue;
 
                     if (check[checkIndex] != 0)
                     {
