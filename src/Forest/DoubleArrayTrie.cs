@@ -160,17 +160,17 @@ namespace Forest
                 {
                     if (tail[oldIndex] == terminator)
                     {
-                        tail[oldIndex] = garbage;
+                        SetTailValue(oldIndex, garbage);
 
                         break;
                     }
 
-                    tail[oldIndex] = garbage;
+                    SetTailValue(oldIndex, garbage);
 
                     continue;
                 }
 
-                tail[oldIndex] = tail[newIndex];
+                SetTailValue(oldIndex, tail[newIndex]);
 
                 if (tail[newIndex] == terminator)
                 {
