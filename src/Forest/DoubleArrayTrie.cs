@@ -108,44 +108,41 @@ namespace Forest
         private void ResolveConflict(string key, int keyOffset, int baseIndex)
         {
             // Store the current base value for later use.
-            var currentBaseValue = -GetBaseValue(baseIndex);
+            var currentTailOffset = -GetBaseValue(baseIndex);
 
-            var tailOffset = currentBaseValue;
-
-            var commonCharacters = GetCommonPrefixCharacters(key, keyOffset, tailOffset).ToArray();
+            var commonCharacters = GetCommonPrefixCharacters(key, keyOffset, currentTailOffset).ToArray();
 
             Debug.WriteLine($"DoubleArrayTrie.ResolveConflict(\"{key}\", {keyOffset}, {baseIndex}): Common characters: {string.Join(", ", commonCharacters)}.");
-
-            var checkIndex = 0;
 
             for (var commonCharacterIndex = 0; commonCharacterIndex < commonCharacters.Length; commonCharacterIndex++)
             {
                 var availableBaseValue = GetAvailableBaseValue(new[] { commonCharacters[commonCharacterIndex] });
-
-                checkIndex = availableBaseValue + GetCharacterValue(commonCharacters[commonCharacterIndex]);
+                var characterValue = GetCharacterValue(commonCharacters[commonCharacterIndex]);
 
                 SetBaseValue(baseIndex, availableBaseValue);
-                SetCheckValue(checkIndex, baseIndex);
+                SetCheckValue(availableBaseValue + characterValue, baseIndex);
+
+                baseIndex = availableBaseValue + characterValue;
             }
 
-            var nextTailCharacter = tail[tailOffset + commonCharacters.Length];
+            var nextTailCharacter = tail[currentTailOffset + commonCharacters.Length];
             var nextKeyCharacter = key[keyOffset + commonCharacters.Length];
 
             var qq = GetAvailableBaseValue(new[] { nextTailCharacter, nextKeyCharacter });
 
-            SetBaseValue(checkIndex, qq);
+            SetBaseValue(baseIndex, qq);
 
-            var newBase = qq + GetCharacterValue(nextTailCharacter);
+            var t = GetBaseValue(baseIndex) + GetCharacterValue(nextTailCharacter);
 
-            SetBaseValue(newBase, -currentBaseValue);
-            SetCheckValue(newBase, checkIndex);
+            SetBaseValue(t, -currentTailOffset);
+            SetCheckValue(t, baseIndex);
 
-            OverwriteTail(currentBaseValue, key.Length - keyOffset - commonCharacters.Length);
+            OverwriteTail(currentTailOffset, key.Length - keyOffset - commonCharacters.Length);
 
-            var t = GetBaseValue(checkIndex) + GetCharacterValue(nextKeyCharacter);
+            var tt = GetBaseValue(baseIndex) + GetCharacterValue(nextKeyCharacter);
 
-            SetBaseValue(t, -tailPosition);
-            SetCheckValue(t, checkIndex);
+            SetBaseValue(tt, -tailPosition);
+            SetCheckValue(tt, baseIndex);
 
             SetTailValues(key, keyOffset + commonCharacters.Length + 1);
         }
