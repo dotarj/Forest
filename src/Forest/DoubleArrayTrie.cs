@@ -137,7 +137,7 @@ namespace Forest
             SetBaseValue(t, -currentTailOffset);
             SetCheckValue(t, baseIndex);
 
-            OverwriteTail(currentTailOffset, key.Length - keyOffset - commonCharacters.Length);
+            OverwriteTail(currentTailOffset, currentTailOffset + commonCharacters.Length + 1);
 
             var tt = GetBaseValue(baseIndex) + GetCharacterValue(nextKeyCharacter);
 
