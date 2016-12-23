@@ -27,7 +27,7 @@ namespace Forest.Test
             trie.Add(key);
 
             // Assert
-            trie.ContainsKey(key);
+            Assert.True(trie.ContainsKey(key));
         }
 
         [Fact]
@@ -40,10 +40,10 @@ namespace Forest.Test
             trie.Add(key);
 
             // Act
-            trie.Add(key);
+            var result = trie.Add(key);
 
             // Assert
-            trie.ContainsKey(key);
+            Assert.False(result);
         }
 
         [Fact]
@@ -59,7 +59,7 @@ namespace Forest.Test
             trie.Add(key);
 
             // Assert
-            trie.ContainsKey(key);
+            Assert.True(trie.ContainsKey(key));
         }
 
         [Fact]
@@ -75,7 +75,7 @@ namespace Forest.Test
             trie.Add(key);
 
             // Assert
-            trie.ContainsKey("bachelor");
+            Assert.True(trie.ContainsKey("bachelor"));
         }
 
         [Fact]
@@ -92,7 +92,7 @@ namespace Forest.Test
             trie.Add(key);
 
             // Assert
-            trie.ContainsKey(key);
+            Assert.True(trie.ContainsKey(key));
         }
 
         [Fact]
