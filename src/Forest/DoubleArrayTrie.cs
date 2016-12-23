@@ -64,7 +64,7 @@ namespace Forest
                         break;
                     }
 
-                    Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): base[{baseIndex}] for character '{key[keyIndex]}' collision.");
+                    Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): Collision on base[{baseIndex}] for character '{key[keyIndex]}'.");
 
                     ResolveConflict(key, keyOffset, baseIndex);
 
@@ -107,47 +107,58 @@ namespace Forest
 
         private void ResolveConflict(string key, int keyOffset, int baseIndex)
         {
-            // Store the current base value for later use.
+            // Store the base value, containing the tail offset for the collided key, for later use.
             var currentTailOffset = -GetBaseValue(baseIndex);
 
-            var commonCharacters = GetCommonPrefixCharacters(key, keyOffset, currentTailOffset).ToArray();
+            // Get the number of characters common to the key and the collided key in tail.
+            var commonCharactersLength = GetCommonCharactersLength(key, keyOffset, currentTailOffset);
 
-            Debug.WriteLine($"DoubleArrayTrie.ResolveConflict(\"{key}\", {keyOffset}, {baseIndex}): Common characters: {string.Join(", ", commonCharacters)}.");
+            Debug.WriteLine($"DoubleArrayTrie.ResolveConflict(\"{key}\", {keyOffset}, {baseIndex}): Common characters length: {commonCharactersLength}.");
 
-            for (var commonCharacterIndex = 0; commonCharacterIndex < commonCharacters.Length; commonCharacterIndex++)
-            {
-                var availableBaseValue = GetAvailableBaseValue(new[] { commonCharacters[commonCharacterIndex] });
-                var characterValue = GetCharacterValue(commonCharacters[commonCharacterIndex]);
+            AddCommonCharacters(key, keyOffset, commonCharactersLength, ref baseIndex);
 
-                SetBaseValue(baseIndex, availableBaseValue);
-                SetCheckValue(availableBaseValue + characterValue, baseIndex);
+            // Get the next character after the common characters of the key and the collided key in tail.
+            var nextTailCharacter = tail[currentTailOffset + commonCharactersLength];
+            var nextKeyCharacter = key[keyOffset + commonCharactersLength];
 
-                baseIndex = availableBaseValue + characterValue;
-            }
+            // Get an available base value for the next character after the common characters of the key and the
+            // collided key in tail.
+            var availableBaseValue = GetAvailableBaseValue(new[] { nextTailCharacter, nextKeyCharacter });
 
-            var nextTailCharacter = tail[currentTailOffset + commonCharacters.Length];
-            var nextKeyCharacter = key[keyOffset + commonCharacters.Length];
-
-            var qq = GetAvailableBaseValue(new[] { nextTailCharacter, nextKeyCharacter });
-
-            SetBaseValue(baseIndex, qq);
+            // The base value previously pointing to the tail is replaced by the available base value.
+            SetBaseValue(baseIndex, availableBaseValue);
 
             var t = GetBaseValue(baseIndex) + GetCharacterValue(nextTailCharacter);
 
             SetBaseValue(t, -currentTailOffset);
             SetCheckValue(t, baseIndex);
 
-            OverwriteTail(currentTailOffset, currentTailOffset + commonCharacters.Length + 1);
+            MoveTailValues(currentTailOffset, currentTailOffset + commonCharactersLength + 1);
 
             var tt = GetBaseValue(baseIndex) + GetCharacterValue(nextKeyCharacter);
 
             SetBaseValue(tt, -tailPosition);
             SetCheckValue(tt, baseIndex);
 
-            SetTailValues(key, keyOffset + commonCharacters.Length + 1);
+            SetTailValues(key, keyOffset + commonCharactersLength + 1);
         }
 
-        private void OverwriteTail(int oldOffset, int newOffset)
+        private void AddCommonCharacters(string key, int keyOffset, int commonCharactersLength, ref int baseIndex)
+        {
+            // All characters in tail common to the current key must be added to base.
+            for (var commonCharacterIndex = 0; commonCharacterIndex < commonCharactersLength; commonCharacterIndex++)
+            {
+                var availableBaseValue = GetAvailableBaseValue(new[] { key[keyOffset + commonCharacterIndex] });
+                var characterValue = GetCharacterValue(key[keyOffset + commonCharacterIndex]);
+
+                SetBaseValue(baseIndex, availableBaseValue);
+                SetCheckValue(availableBaseValue + characterValue, baseIndex);
+
+                baseIndex = availableBaseValue + characterValue;
+            }
+        }
+
+        private void MoveTailValues(int oldOffset, int newOffset)
         {
             var terminatorReached = false;
 
@@ -176,8 +187,10 @@ namespace Forest
             }
         }
 
-        private IEnumerable<char> GetCommonPrefixCharacters(string key, int keyOffset, int tailOffset)
+        private int GetCommonCharactersLength(string key, int keyOffset, int tailOffset)
         {
+            var length = 0;
+
             for (int keyIndex = keyOffset, tailIndex = tailOffset; keyIndex < key.Length; keyIndex++, tailIndex++)
             {
                 var keyValue = key[keyIndex];
@@ -185,11 +198,13 @@ namespace Forest
 
                 if (keyValue != tailValue)
                 {
-                    yield break;
+                    break;
                 }
 
-                yield return key[keyIndex];
+                length++;
             }
+
+            return length;
         }
 
         private int GetAvailableBaseValue(char[] characters)
