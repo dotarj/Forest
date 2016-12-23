@@ -546,13 +546,5 @@ namespace Forest
 
             return $"DoubleArrayTrie.GetCurrentState(): base:  {baseValues}\nDoubleArrayTrie.GetCurrentState(): check: {checkValues}\nDoubleArrayTrie.GetCurrentState(): tail:  {tailValues}";
         }
-
-        // Temporary method for unit testing. Remove (and make $base, check and tail readonly) if Add method is implemented.
-        public void SetArrays(int[] @base, int[] check, char[] tail)
-        {
-            this.@base = @base;
-            this.check = check;
-            this.tail = tail;
-        }
     }
 }

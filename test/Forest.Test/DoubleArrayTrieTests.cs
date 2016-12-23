@@ -134,14 +134,13 @@ namespace Forest.Test
             var key = "bachelor";
             var trie = new DoubleArrayTrie();
 
-            var @base = new [] { 0, 4, 0, 1, -15, -1, -12, 1, 0, 0, 0, 0, 0, 0, 0, -9 };
-            var check = new [] { 0, 0, 0, 7,   3,  3,   3, 1, 0, 0, 0, 0, 0, 0, 0,  1 };
-            var tail = "0helor#??ar#ge#y#".ToCharArray();
+            trie.Add(key);
 
-            trie.SetArrays(@base, check, tail);
+            // Act
+            var containsKey = trie.ContainsKey(key);
 
             // Assert
-            Assert.True(trie.ContainsKey(key));
+            Assert.True(containsKey);
         }
     }
 }
