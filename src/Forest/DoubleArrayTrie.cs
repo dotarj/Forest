@@ -68,6 +68,8 @@ namespace Forest
 
                     ResolveConflict(key, keyOffset, baseIndex);
 
+                    Debug.WriteLine(GetCurrentState());
+
                     return true;
                 }
 
@@ -93,6 +95,8 @@ namespace Forest
 
                     // Store the rest of the key in the tail using the current tail position as the offset. 
                     SetTailValues(key, keyIndex + 1);
+
+                    Debug.WriteLine(GetCurrentState());
 
                     return true;
                 }
@@ -435,8 +439,6 @@ namespace Forest
             Debug.WriteLine($"DoubleArrayTrie.SetBaseValue({index}, {value}): Updating base[{index}] to {value}.");
 
             @base[index] = value;
-
-            Debug.WriteLine(GetCurrentState());
         }
 
         private void ResizeBaseIfNecessary(int index)
@@ -480,8 +482,6 @@ namespace Forest
             Debug.WriteLine($"DoubleArrayTrie.SetCheckValue({index}, {value}): Updating check[{index}] to {value}.");
 
             check[index] = value;
-
-            Debug.WriteLine(GetCurrentState());
         }
 
         private void ResizeCheckIfNecessary(int index)
@@ -515,8 +515,6 @@ namespace Forest
             Debug.WriteLine($"DoubleArrayTrie.SetTailValue({index}, {value}): Updating tail[{index}] to '{value}'.");
 
             tail[index] = value;
-
-            Debug.WriteLine(GetCurrentState());
         }
 
         private void ResizeTailIfNecessary(int index)
