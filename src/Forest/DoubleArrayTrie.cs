@@ -130,6 +130,7 @@ namespace Forest
 
             var t = GetBaseValue(baseIndex) + GetCharacterValue(nextTailCharacter);
 
+            // Set the base value using the previously stored tail offset.
             SetBaseValue(t, -currentTailOffset);
             SetCheckValue(t, baseIndex);
 
@@ -150,6 +151,8 @@ namespace Forest
             {
                 var availableBaseValue = GetAvailableBaseValue(new[] { key[keyOffset + commonCharacterIndex] });
                 var characterValue = GetCharacterValue(key[keyOffset + commonCharacterIndex]);
+
+                Debug.WriteLine($"DoubleArrayTrie.AddCommonCharacters(\"{key}\", {keyOffset}, {commonCharactersLength}, ref {baseIndex}): Updating base[{baseIndex}] using common character '{key[keyOffset + commonCharacterIndex]}'.");
 
                 SetBaseValue(baseIndex, availableBaseValue);
                 SetCheckValue(availableBaseValue + characterValue, baseIndex);
