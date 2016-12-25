@@ -10,7 +10,7 @@ namespace Forest.Test
         {
             // Arrange
             string key = null;
-            var trie = new DoubleArrayTrie();
+            var trie = new DoubleArrayTrie(new TemporaryICharacterValueMapper());
 
             // Assert
             Assert.Throws<ArgumentNullException>(() => trie.Add(key));
@@ -21,7 +21,7 @@ namespace Forest.Test
         {
             // Arrange
             var key = "bachelor";
-            var trie = new DoubleArrayTrie();
+            var trie = new DoubleArrayTrie(new TemporaryICharacterValueMapper());
 
             // Act
             trie.Add(key);
@@ -35,7 +35,7 @@ namespace Forest.Test
         {
             // Arrange
             var key = "bachelor";
-            var trie = new DoubleArrayTrie();
+            var trie = new DoubleArrayTrie(new TemporaryICharacterValueMapper());
 
             trie.Add(key);
 
@@ -51,7 +51,7 @@ namespace Forest.Test
         {
             // Arrange
             var key = "jar";
-            var trie = new DoubleArrayTrie();
+            var trie = new DoubleArrayTrie(new TemporaryICharacterValueMapper());
 
             trie.Add("bachelor");
 
@@ -67,7 +67,7 @@ namespace Forest.Test
         {
             // Arrange
             var key = "jar";
-            var trie = new DoubleArrayTrie();
+            var trie = new DoubleArrayTrie(new TemporaryICharacterValueMapper());
 
             trie.Add("bachelor");
 
@@ -83,7 +83,7 @@ namespace Forest.Test
         {
             // Arrange
             var key = "badge";
-            var trie = new DoubleArrayTrie();
+            var trie = new DoubleArrayTrie(new TemporaryICharacterValueMapper());
 
             trie.Add("bachelor");
             trie.Add("jar");
@@ -100,7 +100,7 @@ namespace Forest.Test
         {
             // Arrange
             var key = "baby";
-            var trie = new DoubleArrayTrie();
+            var trie = new DoubleArrayTrie(new TemporaryICharacterValueMapper());
 
             trie.Add("bachelor");
             trie.Add("jar");
@@ -121,7 +121,7 @@ namespace Forest.Test
         {
             // Arrange
             string key = null;
-            var trie = new DoubleArrayTrie();
+            var trie = new DoubleArrayTrie(new TemporaryICharacterValueMapper());
 
             // Assert
             Assert.Throws<ArgumentNullException>(() => trie.ContainsKey(key));
@@ -132,7 +132,7 @@ namespace Forest.Test
         {
             // Arrange
             var key = "bachelor";
-            var trie = new DoubleArrayTrie();
+            var trie = new DoubleArrayTrie(new TemporaryICharacterValueMapper());
 
             trie.Add(key);
 

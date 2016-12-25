@@ -1,7 +1,6 @@
 // Copyright (c) Arjen Post. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -12,14 +11,23 @@ namespace Forest
         private const char terminator = '#';
         private const char garbage = '?';
 
+        private readonly ICharacterValueMapper characterValueMapper;
+
         private int[] @base = new int[16];
         private int[] check = new int[16];
         private char[] tail = new char[16];
 
         private int tailPosition = 1;
 
-        public DoubleArrayTrie()
+        public DoubleArrayTrie(ICharacterValueMapper characterValueMapper)
         {
+            if (characterValueMapper == null)
+            {
+                throw new ArgumentNullException(nameof(characterValueMapper));
+            }
+
+            this.characterValueMapper = characterValueMapper;
+
             @base[1] = 1;
         }
 
@@ -78,7 +86,7 @@ namespace Forest
                 }
 
                 // Get the numerical value of the current character.
-                var characterValue = GetCharacterValue(key[keyIndex]);
+                var characterValue = characterValueMapper.GetCharacterValue(key[keyIndex]);
 
                 // Get the check value using the base value and the character value.
                 var checkValue = GetCheckValue(baseValue + characterValue);
@@ -136,7 +144,7 @@ namespace Forest
             // The base value previously pointing to the tail is replaced by the available base value.
             SetBaseValue(baseIndex, availableBaseValue);
 
-            var t = GetBaseValue(baseIndex) + GetCharacterValue(nextTailCharacter);
+            var t = GetBaseValue(baseIndex) + characterValueMapper.GetCharacterValue(nextTailCharacter);
 
             // Set the base value using the previously stored tail offset.
             SetBaseValue(t, -currentTailOffset);
@@ -144,7 +152,7 @@ namespace Forest
 
             MoveTailValues(currentTailOffset, currentTailOffset + commonCharactersLength + 1);
 
-            var tt = GetBaseValue(baseIndex) + GetCharacterValue(nextKeyCharacter);
+            var tt = GetBaseValue(baseIndex) + characterValueMapper.GetCharacterValue(nextKeyCharacter);
 
             SetBaseValue(tt, -tailPosition);
             SetCheckValue(tt, baseIndex);
@@ -158,7 +166,7 @@ namespace Forest
             for (var commonCharacterIndex = 0; commonCharacterIndex < commonCharactersLength; commonCharacterIndex++)
             {
                 var availableBaseValue = GetAvailableBaseValue(new[] { key[keyOffset + commonCharacterIndex] });
-                var characterValue = GetCharacterValue(key[keyOffset + commonCharacterIndex]);
+                var characterValue = characterValueMapper.GetCharacterValue(key[keyOffset + commonCharacterIndex]);
 
                 Debug.WriteLine($"DoubleArrayTrie.AddCommonCharacters(\"{key}\", {keyOffset}, {commonCharactersLength}, ref {baseIndex}): Updating base[{baseIndex}] using common character '{key[keyOffset + commonCharacterIndex]}'.");
 
@@ -224,7 +232,7 @@ namespace Forest
             {
                 for (var characterIndex = 0; characterIndex < characters.Length; characterIndex++)
                 {
-                    var characterValue = GetCharacterValue(characters[characterIndex]);
+                    var characterValue = characterValueMapper.GetCharacterValue(characters[characterIndex]);
                     var checkIndex = baseValue + characterValue;
 
                     if (check[checkIndex] != 0)
@@ -282,7 +290,7 @@ namespace Forest
             for (var keyIndex = 0; keyIndex < key.Length; keyIndex++)
             {
                 // Get the numerical value of the current character.
-                var characterValue = GetCharacterValue(key[keyIndex]);
+                var characterValue = characterValueMapper.GetCharacterValue(key[keyIndex]);
 
                 int baseValue;
                 int checkValue;
@@ -529,17 +537,6 @@ namespace Forest
 
                 Array.Resize(ref tail, tail.Length * 2);
             }
-        }
-
-        private int GetCharacterValue(char character)
-        {
-            // Temporary method to retrieve character value.
-            if (character == '#')
-            {
-                return -1;
-            }
-
-            return (int)character - 95;
         }
 
         private string GetCurrentState()
