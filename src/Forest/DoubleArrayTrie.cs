@@ -66,6 +66,10 @@ namespace Forest
 
                     Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): Collision on base[{baseIndex}] for character '{key[keyIndex]}'.");
 
+                    // A conflict has been detected, the base value points to a suffix in tail which does not equal the
+                    // suffix of the current key. To resolve this conflict the starting characters common to the suffix
+                    // in tail and of the key must be inserted in base, the common characters of the suffix in tail
+                    // should be removed, and the the remaining key should be added to tail.
                     ResolveConflict(key, keyOffset, baseIndex);
 
                     Debug.WriteLine(GetCurrentState());
