@@ -114,6 +114,42 @@ namespace Forest
                     return true;
                 }
 
+                if (checkValue != baseIndex)
+                {
+                    var baseReferencedCharacters = GetReferencedCharacters(baseIndex).ToArray();
+                    var checkReferencedCharacters = GetReferencedCharacters(checkValue).ToArray();
+
+                    if (baseReferencedCharacters.Length + 1 < checkReferencedCharacters.Length)
+                    {
+
+                    }
+                    else
+                    {
+                        var referencedBaseValue = GetBaseValue(checkValue); // TODO: This is TEMP_BASE. Naming?
+                        var availableBaseValue = GetAvailableBaseValue(checkReferencedCharacters);
+
+                        SetBaseValue(referencedBaseValue, availableBaseValue);
+
+                        for (var characterIndex = 0; characterIndex < checkReferencedCharacters.Length; characterIndex++)
+                        {
+                            var checkReferencedCharacterValue = characterValueMapper.GetCharacterValue(checkReferencedCharacters[characterIndex]);
+
+                            var temp_node1 = referencedBaseValue + checkReferencedCharacterValue;
+                            var temp_node2 = GetBaseValue(referencedBaseValue) + checkReferencedCharacterValue;
+
+                            SetBaseValue(temp_node2, GetBaseValue(temp_node1));
+                            SetCheckValue(temp_node2, GetCheckValue(temp_node1));
+
+                            if (GetBaseValue(temp_node1) > 0)
+                            {
+                                // Case 4, step 5.
+                            }
+                        }
+                    }
+
+                    throw new NotImplementedException();
+                }
+
                 Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): Character '{key[keyIndex]}' matched.");
 
                 baseIndex = baseValue + characterValue;
