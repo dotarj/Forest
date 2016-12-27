@@ -2,7 +2,7 @@
 
 namespace Forest
 {
-    public class TemporaryICharacterValueMapper : ICharacterValueMapper
+    public class TemporaryCharacterValueMapper : ICharacterValueMapper
     {
         public int MaxCharacterValue
         {
