@@ -1,6 +1,7 @@
 // Copyright (c) Arjen Post. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -119,6 +120,21 @@ namespace Forest
             }
 
             return false;
+        }
+
+        private IEnumerable<char> GetReferencedCharacters(int baseIndex)
+        {
+            var baseValue = GetBaseValue(baseIndex);
+
+            for (var characterValue = characterValueMapper.MinCharacterValue; characterValue < characterValueMapper.MaxCharacterValue; characterValue++)
+            {
+                var checkValue = GetCheckValue(baseValue + characterValue);
+
+                if (checkValue == baseIndex)
+                {
+                    yield return characterValueMapper.GetCharacter(characterValue);
+                }
+            }
         }
 
         private void ResolveConflict(string key, int keyOffset, int baseIndex)
