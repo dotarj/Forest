@@ -4,6 +4,12 @@ namespace Forest
 {
     public interface ICharacterValueMapper
     {
+        int MinCharacterValue { get; }
+
+        int MaxCharacterValue { get; }
+
         int GetCharacterValue(char character);
+
+        char GetCharacter(int characterValue);
     }
 }
