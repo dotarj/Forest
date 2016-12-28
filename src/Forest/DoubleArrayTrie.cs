@@ -92,7 +92,7 @@ namespace Forest
                 // Get the check value using the base value and the character value.
                 var checkValue = GetCheckValue(baseValue + characterValue);
 
-                // A value equal to 0 indicates that the rest of the key is to be inserted in the tail.
+                // A check value equal to 0 indicates that the rest of the key is to be inserted in the tail.
                 if (checkValue == 0)
                 {
                     Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): base[{baseValue + characterValue}] for character '{key[keyIndex]}' available.");
@@ -125,27 +125,39 @@ namespace Forest
                     }
                     else
                     {
-                        var referencedBaseValue = GetBaseValue(checkValue); // TODO: This is TEMP_BASE. Naming?
-                        var availableBaseValue = GetAvailableBaseValue(checkReferencedCharacters);
+                        var referencedNode = GetBaseValue(checkValue);
+                        var availableNode = GetAvailableBaseValue(checkReferencedCharacters);
 
-                        SetBaseValue(referencedBaseValue, availableBaseValue);
+                        // The node which is referenced by the current node must be pointed to the available node.
+                        SetBaseValue(referencedNode, availableNode);
 
+                        // Each referenced node must be moved to the available node.
                         for (var characterIndex = 0; characterIndex < checkReferencedCharacters.Length; characterIndex++)
                         {
                             var checkReferencedCharacterValue = characterValueMapper.GetCharacterValue(checkReferencedCharacters[characterIndex]);
 
-                            var temp_node1 = referencedBaseValue + checkReferencedCharacterValue;
-                            var temp_node2 = GetBaseValue(referencedBaseValue) + checkReferencedCharacterValue;
+                            var oldNode = referencedNode + checkReferencedCharacterValue;
+                            var newNode = GetBaseValue(referencedNode) + checkReferencedCharacterValue;
 
-                            SetBaseValue(temp_node2, GetBaseValue(temp_node1));
-                            SetCheckValue(temp_node2, GetCheckValue(temp_node1));
+                            // Move the base and check value of the old node to the new node.
+                            SetBaseValue(newNode, GetBaseValue(oldNode));
+                            SetCheckValue(newNode, GetCheckValue(oldNode));
 
-                            if (GetBaseValue(temp_node1) > 0)
+                            // A positive base value indicates that this node is referenced by other nodes, thus not
+                            // referencing the tail. The nodes that reference this node should be pointed to the new
+                            // node.
+                            if (GetBaseValue(oldNode) > 0)
                             {
-                                // Case 4, step 5.
+                                UpdateReferencingNodes(oldNode, newNode);
                             }
+
+                            // Reset the base and check value of the old node to make it available again.
+                            SetBaseValue(oldNode, 0);
+                            SetCheckValue(oldNode, 0);
                         }
                     }
+
+                    Debug.WriteLine(GetCurrentState());
 
                     throw new NotImplementedException();
                 }
@@ -156,6 +168,22 @@ namespace Forest
             }
 
             return false;
+        }
+
+        private void UpdateReferencingNodes(int oldNode, int newNode)
+        {
+            var offset = GetBaseValue(oldNode) + 1; // TODO: Naming
+
+            // Update the check value of all nodes referencing the old node to the new node.
+            while (offset - GetBaseValue(oldNode) < characterValueMapper.MaxCharacterValue - characterValueMapper.MinCharacterValue)
+            {
+                if (GetCheckValue(offset) == oldNode)
+                {
+                    SetCheckValue(offset, newNode);
+                }
+
+                ++offset;
+            }
         }
 
         private IEnumerable<char> GetReferencedCharacters(int baseIndex)
