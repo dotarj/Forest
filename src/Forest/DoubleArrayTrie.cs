@@ -47,39 +47,32 @@ namespace Forest
 
             Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): Executing.");
 
-            var baseIndex = 1;
+            var currentNode = 1;
 
             for (var keyIndex = 0; keyIndex < key.Length; keyIndex++)
             {
-                // Get the base value using the base index.
-                var baseValue = GetBaseValue(baseIndex);
-
                 // A negative base value indicates that further matching is to be performed in the tail.
-                if (baseValue < 0)
+                if (GetBaseValue(currentNode) < 0)
                 {
                     Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): Proceed matching in tail.");
 
-                    // Use the negation of the base value as the offset for further matching in the tail.
-                    var tailOffset = -baseValue;
-
-                    // Use the index of the next character as the offset for further matching in the tail.
-                    var keyOffset = keyIndex;
-
-                    // Determine whether the key is already present. If so, return false as it is already added.
-                    if (CheckTailValues(key, keyOffset, tailOffset))
+                    // Determine whether the key is already present. If so, return false as it is already added. Use
+                    // the index of the next character as the key offset and the negation of the base value as the tail
+                    // offset for further matching in the tail.
+                    if (CheckTailValues(key, keyIndex, -GetBaseValue(currentNode)))
                     {
                         Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): The key '{key}' is already present.");
 
                         break;
                     }
 
-                    Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): Collision on base[{baseIndex}] for character '{key[keyIndex]}'.");
+                    Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): Collision on base[{currentNode}] for character '{key[keyIndex]}'.");
 
                     // A conflict has been detected, the base value points to a suffix in tail which does not equal the
-                    // suffix of the current key. To resolve this conflict the starting characters common to the suffix
-                    // in tail and of the key must be inserted in base, the common characters of the suffix in tail
-                    // should be removed, and the the remaining key should be added to tail.
-                    ResolveConflict(key, keyOffset, baseIndex);
+                    // remaining key. To resolve this conflict the starting characters common to the suffix in tail and
+                    // of the key must be inserted in base, the common characters of the suffix in tail should be
+                    // removed, and the remaining key should be added to tail.
+                    ResolveTailConflict(key, keyIndex, currentNode);
 
                     Debug.WriteLine(GetCurrentState());
 
@@ -89,100 +82,134 @@ namespace Forest
                 // Get the numerical value of the current character.
                 var characterValue = characterValueMapper.GetCharacterValue(key[keyIndex]);
 
-                // Get the check value using the base value and the character value.
-                var checkValue = GetCheckValue(baseValue + characterValue);
+                var desiredNode = GetBaseValue(currentNode) + characterValue;
 
                 // A check value equal to 0 indicates that the rest of the key is to be inserted in the tail.
-                if (checkValue == 0)
+                if (GetCheckValue(desiredNode) == 0)
                 {
-                    Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): base[{baseValue + characterValue}] for character '{key[keyIndex]}' available.");
-
-                    // Set the base value using the base value and the character value. Use the negation of the tail
-                    // position as the new base value. This negative value indicates that the rest of the key is
-                    // inserted in the tail.
-                    SetBaseValue(baseValue + characterValue, -tailPosition);
-
-                    // Set the check value using the base value and the character value. Use the base index as the new
-                    // value. This value indicates the node it comes from.
-                    SetCheckValue(baseValue + characterValue, baseIndex);
-
-                    // Store the rest of the key in the tail using the current tail position as the offset. 
-                    SetTailValues(key, keyIndex + 1);
-
-                    Debug.WriteLine(GetCurrentState());
+                    Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): base[{desiredNode}] for character '{key[keyIndex]}' available.");
+                    
+                    AppendTail(key, keyIndex, currentNode, characterValue);
 
                     return true;
                 }
 
-                if (checkValue != baseIndex)
+                // A check value that does not equal the current base index indicates that the base index is used in a
+                // different situation.
+                if (GetCheckValue(desiredNode) != currentNode)
                 {
-                    var baseReferencedCharacters = GetReferencedCharacters(baseIndex).ToArray();
-                    var checkReferencedCharacters = GetReferencedCharacters(checkValue).ToArray();
+                    ResolveConflict(key, keyIndex, currentNode, characterValue);
 
-                    if (baseReferencedCharacters.Length + 1 < checkReferencedCharacters.Length)
-                    {
-
-                    }
-                    else
-                    {
-                        var referencedNode = GetBaseValue(checkValue);
-                        var availableNode = GetAvailableBaseValue(checkReferencedCharacters);
-
-                        // The node which is referenced by the current node must be pointed to the available node.
-                        SetBaseValue(referencedNode, availableNode);
-
-                        // Each referenced node must be moved to the available node.
-                        for (var characterIndex = 0; characterIndex < checkReferencedCharacters.Length; characterIndex++)
-                        {
-                            var checkReferencedCharacterValue = characterValueMapper.GetCharacterValue(checkReferencedCharacters[characterIndex]);
-
-                            var oldNode = referencedNode + checkReferencedCharacterValue;
-                            var newNode = GetBaseValue(referencedNode) + checkReferencedCharacterValue;
-
-                            // Move the base and check value of the old node to the new node.
-                            SetBaseValue(newNode, GetBaseValue(oldNode));
-                            SetCheckValue(newNode, GetCheckValue(oldNode));
-
-                            // A positive base value indicates that this node is referenced by other nodes, thus not
-                            // referencing the tail. The nodes that reference this node should be pointed to the new
-                            // node.
-                            if (GetBaseValue(oldNode) > 0)
-                            {
-                                UpdateReferencingNodes(oldNode, newNode);
-                            }
-
-                            // Reset the base and check value of the old node to make it available again.
-                            SetBaseValue(oldNode, 0);
-                            SetCheckValue(oldNode, 0);
-                        }
-                    }
-
-                    Debug.WriteLine(GetCurrentState());
-
-                    throw new NotImplementedException();
+                    return true;
                 }
 
                 Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): Character '{key[keyIndex]}' matched.");
 
-                baseIndex = baseValue + characterValue;
+                currentNode = desiredNode;
             }
 
             return false;
         }
 
-        private void UpdateReferencingNodes(int oldNode, int newNode)
+        private void AppendTail(string key, int keyIndex, int currentNode, int characterValue)
         {
-            var offset = GetBaseValue(oldNode) + 1; // TODO: Naming
+            var desiredNode = GetBaseValue(currentNode) + characterValue;
 
-            // Update the check value of all nodes referencing the old node to the new node.
-            while (offset - GetBaseValue(oldNode) < characterValueMapper.MaxCharacterValue - characterValueMapper.MinCharacterValue)
+            // Set the base value using the base value and the character value. Use the negation of the tail
+            // position as the new base value. This negative value indicates that the rest of the key is
+            // inserted in the tail.
+            SetBaseValue(desiredNode, -tailPosition);
+
+            // Set the check value using the base value and the character value. Use the base index as the new
+            // value. This value indicates the node it comes from.
+            SetCheckValue(desiredNode, currentNode);
+
+            // Store the rest of the key in the tail using the current tail position as the offset. 
+            SetTailValues(key, keyIndex + 1);
+
+            Debug.WriteLine(GetCurrentState());
+        }
+
+        private void ResolveConflict(string key, int keyIndex, int baseIndex, int characterValue)
+        {
+            var desiredNode = GetBaseValue(baseIndex) + characterValue;
+            var checkValue = GetCheckValue(desiredNode);
+
+            var baseReferencedCharacters = GetReferencedCharacters(baseIndex).ToArray();
+            var checkReferencedCharacters = GetReferencedCharacters(checkValue).ToArray();
+
+            if (baseReferencedCharacters.Length + 1 < checkReferencedCharacters.Length)
             {
-                if (GetCheckValue(offset) == oldNode)
+                var a_list = baseReferencedCharacters.Concat(key[keyIndex]).ToArray();
+
+                var availableBaseValue = GetAvailableBaseValue(a_list);
+
+                NewMethod(baseIndex, baseReferencedCharacters, availableBaseValue);
+            }
+            else
+            {
+
+                var availableBaseValue = GetAvailableBaseValue(checkReferencedCharacters);
+
+                NewMethod(checkValue, checkReferencedCharacters, availableBaseValue);
+            }
+
+            var t = GetBaseValue(baseIndex) + characterValue;
+
+            SetBaseValue(t, -tailPosition);
+            SetCheckValue(t, baseIndex);
+
+            SetTailValues(key, keyIndex + 1);
+
+            Debug.WriteLine(GetCurrentState());
+        }
+
+        private void NewMethod(int baseIndex, char[] referencedCharacters, int availableBaseValue)
+        {
+            var baseValue = GetBaseValue(baseIndex);
+            
+            // The node which is referenced by the current node must be pointed to the available node.
+            SetBaseValue(baseIndex, availableBaseValue);
+
+            // Each referenced node must be moved to the available node.
+            for (var characterIndex = 0; characterIndex < referencedCharacters.Length; characterIndex++)
+            {
+                var characterValue = characterValueMapper.GetCharacterValue(referencedCharacters[characterIndex]);
+
+                var oldNode = baseValue + characterValue;
+                var newNode = GetBaseValue(baseIndex) + characterValue;
+
+                // Move the base and check value of the old node to the new node.
+                SetBaseValue(newNode, GetBaseValue(oldNode));
+                SetCheckValue(newNode, baseIndex);
+
+                // A positive base value indicates that this node is referenced by other nodes, thus not
+                // referencing the tail. The nodes that reference this node should be pointed to the new
+                // node.
+                if (GetBaseValue(oldNode) > 0)
                 {
-                    SetCheckValue(offset, newNode);
+                    UpdateReferencingNodes(oldNode, newNode);
                 }
 
-                ++offset;
+                // Reset the base and check value of the old node to make it available again.
+                SetBaseValue(oldNode, 0);
+                SetCheckValue(oldNode, 0);
+            }
+        }
+
+        private void UpdateReferencingNodes(int oldNode, int newNode)
+        {
+            var a = GetBaseValue(oldNode) + 1;
+
+            // Update the check value of all nodes referencing the old node to the new node.
+            while (a - GetBaseValue(oldNode) < characterValueMapper.MaxCharacterValue - characterValueMapper.MinCharacterValue)
+            {
+                if (GetCheckValue(a) == oldNode)
+                {
+                    SetCheckValue(a, newNode);
+                }
+
+                a++;
             }
         }
 
@@ -201,7 +228,7 @@ namespace Forest
             }
         }
 
-        private void ResolveConflict(string key, int keyOffset, int baseIndex)
+        private void ResolveTailConflict(string key, int keyOffset, int baseIndex)
         {
             // Store the base value, containing the tail offset for the collided key, for later use.
             var currentTailOffset = -GetBaseValue(baseIndex);
@@ -313,9 +340,8 @@ namespace Forest
                 for (var characterIndex = 0; characterIndex < characters.Length; characterIndex++)
                 {
                     var characterValue = characterValueMapper.GetCharacterValue(characters[characterIndex]);
-                    var checkIndex = baseValue + characterValue;
-
-                    if (check[checkIndex] != 0)
+                    
+                    if (GetCheckValue(baseValue + characterValue) != 0)
                     {
                         break;
                     }
