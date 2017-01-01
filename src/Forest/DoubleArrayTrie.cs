@@ -42,37 +42,37 @@ namespace Forest
         {
             if (key == null)
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): Executing.");
 
-            var currentNode = 1;
+            var baseIndex = 1;
 
             for (var keyIndex = 0; keyIndex < key.Length; keyIndex++)
             {
                 // A negative base value indicates that further matching is to be performed in the tail.
-                if (GetBaseValue(currentNode) < 0)
+                if (GetBaseValue(baseIndex) < 0)
                 {
                     Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): Proceed matching in tail.");
 
                     // Determine whether the key is already present. If so, return false as it is already added. Use
                     // the index of the next character as the key offset and the negation of the base value as the tail
                     // offset for further matching in the tail.
-                    if (CheckTailValues(key, keyIndex, -GetBaseValue(currentNode)))
+                    if (CheckTailValues(key, keyIndex, -GetBaseValue(baseIndex)))
                     {
                         Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): The key '{key}' is already present.");
 
                         break;
                     }
 
-                    Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): Collision on base[{currentNode}] for character '{key[keyIndex]}'.");
+                    Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): Collision on base[{baseIndex}] for character '{key[keyIndex]}'.");
 
                     // A conflict has been detected, the base value points to a suffix in tail which does not equal the
                     // remaining key. To resolve this conflict the starting characters common to the suffix in tail and
                     // of the key must be inserted in base, the common characters of the suffix in tail should be
                     // removed, and the remaining key should be added to tail.
-                    ResolveTailConflict(key, keyIndex, currentNode);
+                    ResolveTailConflict(key, keyIndex, baseIndex);
 
                     Debug.WriteLine(GetCurrentState());
 
@@ -82,30 +82,30 @@ namespace Forest
                 // Get the numerical value of the current character.
                 var characterValue = characterValueMapper.GetCharacterValue(key[keyIndex]);
 
-                var desiredNode = GetBaseValue(currentNode) + characterValue;
+                var nextBaseIndex = GetBaseValue(baseIndex) + characterValue;
 
                 // A check value equal to 0 indicates that the rest of the key is to be inserted in the tail.
-                if (GetCheckValue(desiredNode) == 0)
+                if (GetCheckValue(nextBaseIndex) == 0)
                 {
-                    Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): base[{desiredNode}] for character '{key[keyIndex]}' available.");
+                    Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): base[{nextBaseIndex}] for character '{key[keyIndex]}' available.");
                     
-                    AppendTail(key, keyIndex, currentNode, characterValue);
+                    AppendTail(key, keyIndex, baseIndex, characterValue);
 
                     return true;
                 }
 
                 // A check value that does not equal the current base index indicates that the base index is used in a
                 // different situation.
-                if (GetCheckValue(desiredNode) != currentNode)
+                if (GetCheckValue(nextBaseIndex) != baseIndex)
                 {
-                    ResolveConflict(key, keyIndex, currentNode, characterValue);
+                    ResolveConflict(key, keyIndex, baseIndex, characterValue);
 
                     return true;
                 }
 
                 Debug.WriteLine($"DoubleArrayTrie.Add(\"{key}\"): Character '{key[keyIndex]}' matched.");
 
-                currentNode = desiredNode;
+                baseIndex = nextBaseIndex;
             }
 
             return false;
