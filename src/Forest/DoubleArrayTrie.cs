@@ -386,7 +386,7 @@ namespace Forest
         {
             if (key == null)
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             Debug.WriteLine($"DoubleArrayTrie.ContainsKey(\"{key}\"): Executing.");
@@ -395,11 +395,7 @@ namespace Forest
 
             for (var keyIndex = 0; keyIndex < key.Length; keyIndex++)
             {
-                // Get the numerical value of the current character.
-                var characterValue = characterValueMapper.GetCharacterValue(key[keyIndex]);
-
                 int baseValue;
-                int checkValue;
 
                 // Try to get the base value using the base index. This method returns false if the check array length
                 // is smaller than the requested index.
@@ -413,6 +409,11 @@ namespace Forest
                 // A positive value indicates a possible character match.
                 if (baseValue > 0)
                 {
+                    // Get the numerical value of the current character.
+                    var characterValue = characterValueMapper.GetCharacterValue(key[keyIndex]);
+
+                    int checkValue;
+
                     // Try to get the check value using the base value and the character value. This method returns
                     // false if the check array length is smaller than the requested index.
                     if (!TryGetCheckValue(baseValue + characterValue, out checkValue))
@@ -442,12 +443,9 @@ namespace Forest
                 {
                     Debug.WriteLine($"DoubleArrayTrie.ContainsKey(\"{key}\"): Proceed matching in tail.");
 
-                    // Use the negation of the base value as the offset for further matching in the tail.
-                    var tailOffset = -baseValue;
-                    // Use the index of the next character as the offset for further matching in the tail.
-                    var keyOffset = keyIndex;
-
-                    return CheckTailValues(key, keyOffset, tailOffset);
+                    // Use the index of the next character as the key offset and the negation of the base value as the
+                    // tail offset for further matching in the tail.
+                    return CheckTailValues(key, keyIndex, -baseValue);
                 }
                 else
                 {
